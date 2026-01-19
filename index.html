@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Recibos - Monte Sinai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 50%, #d4af37 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        h1 {
+            grid-column: 1 / -1;
+            color: #1a3a7a;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a3a7a 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1a3a7a;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea, select {
+            padding: 14px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+            background-color: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            grid-column: 1 / -1;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(26, 58, 122, 0.4);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #4CAF50 0%, #66bb6a 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+            color: white;
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(244, 67, 54, 0.4);
+        }
+
+        .preview-section {
+            border-left: 2px solid #e0e0e0;
+            padding-left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .preview-section {
+                border-left: none;
+                border-top: 2px solid #e0e0e0;
+                padding-left: 0;
+                padding-top: 30px;
+            }
+        }
+
+        .preview-title {
+            font-weight: 600;
+            color: #444;
+            font-size: 16px;
+        }
+
+        #preview {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            min-height: 400px;
+            overflow-y: auto;
+            max-height: 600px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .receipt {
+            background: white;
+            padding: 35px;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            page-break-after: always;
+            font-family: 'Times New Roman', serif;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .receipt-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 4px solid #d4af37;
+            padding-bottom: 25px;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+            border: 5px solid #d4af37;
+            object-fit: cover;
+            display: block;
+        }
+
+        .organization-info {
+            text-align: center;
+            flex: 1;
+        }
+
+        .organization-info h2 {
+            color: #d4af37;
+            font-size: 16px;
+            margin: 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .organization-info p {
+            color: #1a3a7a;
+            font-size: 12px;
+            margin: 3px 0;
+            font-weight: 500;
+        }
+
+        .receipt-number {
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .receipt-number strong {
+            font-size: 18px;
+            color: #1a3a7a;
+        }
+
+        .receipt-body {
+            margin-bottom: 20px;
+        }
+
+        .receipt-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px dotted #999;
+            padding-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .receipt-field-label {
+            font-weight: bold;
+            color: #1a3a7a;
+        }
+
+        .receipt-field-value {
+            color: #333;
+            text-align: right;
+        }
+
+        .receipt-main-text {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #d4af37;
+            margin: 20px 0;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .receipt-amount {
+            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 25px 0;
+            color: #d4af37;
+            box-shadow: 0 10px 30px rgba(26, 58, 122, 0.3);
+        }
+
+        .receipt-amount-label {
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .receipt-amount-value {
+            font-size: 40px;
+            font-weight: bold;
+            color: #d4af37;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            border-top: 2px solid #1a3a7a;
+            padding-top: 15px;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            margin-top: 50px;
+            text-align: center;
+            padding-top: 25px;
+            border-top: 2px dotted #d4af37;
+        }
+
+        .signature-line {
+            border-top: 2px solid #1a3a7a;
+            padding-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a3a7a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .signature-img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .empty-preview {
+            color: #999;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message {
+            display: none;
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            color: #1a3a7a;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            color: white;
+        }
+
+        .historico-item {
+            background: #f0f7ff;
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #d4af37;
+        }
+
+        .historico-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+        }
+
+        .historico-numero {
+            font-weight: bold;
+            color: #1a3a7a;
+            font-size: 14px;
+        }
+
+        .historico-detalhes {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .historico-data {
+            font-size: 11px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #1a3a7a;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .tab-button.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .historico-vazio {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .btn-historico {
+            background: #e3f2fd;
+            color: #1a3a7a;
+            border: 2px solid #1a3a7a;
+            flex: 0;
+            padding: 12px 16px;
+            font-size: 13px;
+            gap: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-historico:hover {
+            background: #1a3a7a;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 Gerador de Recibos - Loja Monte Sinai</h1>
+
+        <div class="form-section">
+            <div class="success-message" id="successMessage">✓ Recibo gerado com sucesso!</div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="numeroRecibo">Número do Recibo</label>
+                    <input type="text" id="numeroRecibo" placeholder="Ex: 2026-02" value="2026-02" readonly style="background-color: #e8f4f8; cursor: not-allowed;">
+                </div>
+                <button type="button" onclick="abrirEditorRecibo()" style="background: #1a3a7a; color: white; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s; text-transform: uppercase; align-self: flex-end; margin-bottom: 0;">✏️ Editar</button>
+                <button type="button" onclick="abrirHistorico()" class="btn-historico" style="align-self: flex-end; margin-bottom: 0;">📋 Histórico</button>
+            </div>
+
+            <div id="modalEditorRecibo" class="modal">
+                <div class="modal-content">
+                    <h3>Editar Número do Recibo</h3>
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Número (Ex: 2026-02)</label>
+                        <input type="text" id="inputNumeroRecibo" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;" placeholder="2026-02">
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" onclick="fecharEditorRecibo()" class="btn-cancel">Cancelar</button>
+                        <button type="button" onclick="confirmarNumeroRecibo()" class="btn-confirm">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modalHistorico" class="modal">
+                <div class="modal-content">
+                    <h3>📋 Histórico de Recibos</h3>
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="mudarAbaHistorico('ultimos')">Últimos 3</button>
+                        <button class="tab-button" onclick="mudarAbaHistorico('todos')">Todos</button>
+                    </div>
+                    <div id="tab-ultimos" class="tab-content active">
+                        <div id="historico-ultimos"></div>
+                    </div>
+                    <div id="tab-todos" class="tab-content">
+                        <div id="historico-todos"></div>
+                    </div>
+                    <div class="modal-buttons" style="margin-top: 20px;">
+                        <button type="button" onclick="limparHistorico()" class="btn-clear" style="flex: 1;">Limpar Histórico</button>
+                        <button type="button" onclick="fecharHistorico()" class="btn-cancel" style="flex: 1;">Fechar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="dataRecibo">Data do Recibo</label>
+                    <input type="date" id="dataRecibo">
+                </div>
+                <div class="form-group">
+                    <label for="local">Local (Cidade/Estado)</label>
+                    <input type="text" id="local" placeholder="Ex: Porto Alegre, RS" value="Porto Alegre, RS">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="nomePagador">Recebido de (Nome)</label>
+                <input list="listaPagadores" id="nomePagador" placeholder="Ex: Luiz Fernando Silva de Oliveira" autocomplete="off">
+                <datalist id="listaPagadores"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="cimPagador">CIM</label>
+                <input type="text" id="cimPagador" placeholder="Preenchido automaticamente" readonly style="background-color: #e8f4f8; cursor: not-allowed;">
+            </div>
+
+            <div class="form-group">
+                <label for="valor">Valor (R$)</label>
+                <input type="number" id="valor" placeholder="0.00" step="0.01" min="0">
+            </div>
+
+            <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-weight: 600; color: #1a3a7a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Meses de Referência</label>
+                <div id="mesosContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="text" class="mesInput" placeholder="Janeiro de 2026" readonly style="flex: 1; cursor: pointer; padding: 14px 16px; border: 2px solid #e8e8e8; border-radius: 10px; background-color: #f8f9fa; font-size: 14px; transition: all 0.3s ease;">
+                        <button type="button" class="btnMesRemover" onclick="removerMes(this)" style="background: #f44336; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: none;">×</button>
+                    </div>
+                </div>
+                <button type="button" onclick="adicionarMes()" style="background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; border-radius: 10px; padding: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;">+ Adicionar Mês</button>
+            </div>
+
+            <div id="modalMes" class="modal">
+                <div class="modal-content">
+                    <h3>Selecione Mês e Ano</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Mês</label>
+                            <select id="selectMes" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
+                                <option value="0">Janeiro</option>
+                                <option value="1">Fevereiro</option>
+                                <option value="2">Março</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Maio</option>
+                                <option value="5">Junho</option>
+                                <option value="6">Julho</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Setembro</option>
+                                <option value="9">Outubro</option>
+                                <option value="10">Novembro</option>
+                                <option value="11">Dezembro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Ano</label>
+                            <input type="number" id="selectAno" value="2026" min="2000" max="2099" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" onclick="fecharModal()" class="btn-cancel">Cancelar</button>
+                        <button type="button" onclick="confirmarMes()" class="btn-confirm">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="descricao">Motivo/Destinação (Opcional)</label>
+                <textarea id="descricao" placeholder="Ex: Doação correspondente aos meses de novembro e dezembro de 2025"></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-generate" onclick="gerarRecibo()">Gerar Recibo</button>
+                <button class="btn-download" onclick="baixarRecibo()" id="btnBaixar" style="display: none;">📥 Baixar PDF</button>
+                <button class="btn-clear" onclick="limparFormulario()">Limpar</button>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-title">📄 Visualização do Recibo</div>
+            <div id="preview">
+                <div class="empty-preview">Preencha os dados e clique em "Gerar Recibo" para visualizar aqui</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('dataRecibo').valueAsDate = new Date();
+
+        const logoURL = 'https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/20d785f1-ec9c-4909-a2b7-c92d78dca259';
+        const assinaturaTesoureiro = 'https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/3ba79747-82a7-4af3-a4d5-f48ed5be312a';
+
+        const cadastroPagadores = [
+            { nome: "Adriano Locateli Da Rosa", cim: "27529" },
+            { nome: "Agnelo Francisco Chiodo", cim: "19337" },
+            { nome: "Alexandre Coimbra Martins", cim: "27530" },
+            { nome: "Celso Jose Costatulio Da Silva Esteves", cim: "10967" },
+            { nome: "Cicero Marcos Vagre Rodrigues", cim: "16272" },
+            { nome: "Claudio Tione Scherer De Melo", cim: "17607" },
+            { nome: "Delmar De Avila Leal", cim: "10234" },
+            { nome: "Edison Lourenço Verdi", cim: "11344" },
+            { nome: "Eduardo Edson Domingues Soares", cim: "18374" },
+            { nome: "Eduardo Germano Felker Andreis", cim: "23407" },
+            { nome: "Eduardo Moura Mendes", cim: "16844" },
+            { nome: "Eduardo Niederauer Silveira De Morais", cim: "22532" },
+            { nome: "Eduardo Sibemberg Saint Pierre", cim: "20557" },
+            { nome: "Evanir De Castro Santana", cim: "11533" },
+            { nome: "Felipe Chiva Querol", cim: "25417" },
+            { nome: "Guilherme Mallmann Cancelli", cim: "22533" },
+            { nome: "Gustavo Lutz Baggio", cim: "25418" },
+            { nome: "Ivens Giuliano Campos Dos Santos", cim: "15003" },
+            { nome: "Jaime Moises Wainer", cim: "10511" },
+            { nome: "Jefferson De Barros Jacques", cim: "17878" },
+            { nome: "Jorcei Soares Chiochetta", cim: "27603" },
+            { nome: "Jorge Dirceu Abreu Silva Filho", cim: "23409" },
+            { nome: "Jose Carlos Dos Santos Junior", cim: "27488" },
+            { nome: "Jose Ricardo Neves De Lima", cim: "16206" },
+            { nome: "Leao David Unikowsky", cim: "17880" },
+            { nome: "Lucas Souza Baronccini", cim: "26611" },
+            { nome: "Lucio Baumhardt Batista", cim: "27489" },
+            { nome: "Luigi Gustavo Soares Pereira", cim: "15845" },
+            { nome: "Luiz Fernando Silva De Oliveira", cim: "10241" },
+            { nome: "Marcelo Antonio Guimaraes Flach", cim: "18207" },
+            { nome: "Marcelo Clementel De Araújo", cim: "22006" },
+            { nome: "Marcelo Pureza Verdi", cim: "27502" },
+            { nome: "Mauricio Brum Esteves", cim: "20480" },
+            { nome: "Moacir Sibemberg", cim: "10244" },
+            { nome: "Mohamad Mazzini Abdelaziz", cim: "25419" },
+            { nome: "Osmar Oliveira Neves Filho", cim: "20149" },
+            { nome: "Pedro Carlos Oliveira Moreira", cim: "16277" },
+            { nome: "Rafael Vagner Nobre", cim: "26613" },
+            { nome: "Rogerio Araujo De Souza", cim: "23449" },
+            { nome: "Rogerio Silveira Torres", cim: "18931" },
+            { nome: "Sergio Edson Domingues Soares", cim: "14415" },
+            { nome: "Sidney Ochman", cim: "10250" },
+            { nome: "Thomaz Jose Mendonça Rodrigues", cim: "19339" },
+            { nome: "Victor Elencave", cim: "22007" }
+        ];
+
+        // Preencher o datalist de nomes
+        const datalistPagadores = document.getElementById('listaPagadores');
+        cadastroPagadores.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.nome;
+            option.label = p.nome + " - CIM " + p.cim;
+            datalistPagadores.appendChild(option);
+        });
+
+        // Atualizar CIM ao escolher o nome
+        const inputNomePagador = document.getElementById('nomePagador');
+        const inputCimPagador = document.getElementById('cimPagador');
+
+        inputNomePagador.addEventListener('change', () => {
+            const valor = inputNomePagador.value.trim();
+            const encontrado = cadastroPagadores.find(p => p.nome === valor);
+            if (encontrado) {
+                inputCimPagador.value = encontrado.cim;
+            } else {
+                inputCimPagador.value = "";
+            }
+        });
+
+        let mesesSelecionados = [];
+        let numeroReceboAtual = '2026-02';
+
+        // FUNÇÕES DE HISTÓRICO
+        function salvarHistorico(recibo) {
+            let historico = JSON.parse(localStorage.getItem('historicoRecibos')) || [];
+            historico.unshift(recibo);
+            localStorage.setItem('historicoRecibos', JSON.stringify(historico));
+        }
+
+        function obterHistorico() {
+            return JSON.parse(localStorage.getItem('historicoRecibos')) || [];
+        }
+
+        function abrirHistorico() {
+            document.getElementById('modalHistorico').classList.add('active');
+            renderizarHistorico();
+        }
+
+        function fecharHistorico() {
+            document.getElementById('modalHistorico').classList.remove('active');
+        }
+
+        function renderizarHistorico() {
+            const historico = obterHistorico();
+            const ultimos3 = historico.slice(0, 3);
+
+            // Aba Últimos 3
+            const divUltimos = document.getElementById('historico-ultimos');
+            if (ultimos3.length === 0) {
+                divUltimos.innerHTML = '<div class="historico-vazio">Nenhum recibo gerado ainda</div>';
+            } else {
+                divUltimos.innerHTML = ultimos3.map(r => `
+                    <div class="historico-item" onclick="preencherDoHistorico('${r.nome}', '${r.cim}', '${r.numero}')">
+                        <div class="historico-numero">📋 Recibo #${r.numero}</div>
+                        <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
+                        <div class="historico-detalhes">💰 R$ ${r.valor}</div>
+                        <div class="historico-data">📅 ${new Date(r.data).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Aba Todos
+            const divTodos = document.getElementById('historico-todos');
+            if (historico.length === 0) {
+                divTodos.innerHTML = '<div class="historico-vazio">Nenhum recibo gerado ainda</div>';
+            } else {
+                divTodos.innerHTML = historico.map(r => `
+                    <div class="historico-item" onclick="preencherDoHistorico('${r.nome}', '${r.cim}', '${r.numero}')">
+                        <div class="historico-numero">📋 Recibo #${r.numero}</div>
+                        <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
+                        <div class="historico-detalhes">💰 R$ ${r.valor}</div>
+                        <div class="historico-data">📅 ${new Date(r.data).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function preencherDoHistorico(nome, cim, numero) {
+            document.getElementById('nomePagador').value = nome;
+            document.getElementById('cimPagador').value = cim;
+            document.getElementById('numeroRecibo').value = numero;
+            numeroReceboAtual = numero;
+            fecharHistorico();
+        }
+
+        function limparHistorico() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                localStorage.removeItem('historicoRecibos');
+                renderizarHistorico();
+            }
+        }
+
+        function mudarAbaHistorico(aba) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + aba).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function abrirEditorRecibo() {
+            document.getElementById('inputNumeroRecibo').value = document.getElementById('numeroRecibo').value;
+            document.getElementById('modalEditorRecibo').classList.add('active');
+        }
+
+        function fecharEditorRecibo() {
+            document.getElementById('modalEditorRecibo').classList.remove('active');
+        }
+
+        function confirmarNumeroRecibo() {
+            const novoNumero = document.getElementById('inputNumeroRecibo').value.trim();
+            if (!novoNumero) {
+                alert('Por favor, preencha o número do recibo');
+                return;
+            }
+            numeroReceboAtual = novoNumero;
+            document.getElementById('numeroRecibo').value = novoNumero;
+            fecharEditorRecibo();
+        }
+
+        function incrementarNumeroRecibo() {
+            const partes = numeroReceboAtual.split('-');
+            if (partes.length === 2) {
+                const ano = partes[0];
+                const numero = parseInt(partes[1]) + 1;
+                numeroReceboAtual = `${ano}-${String(numero).padStart(2, '0')}`;
+                document.getElementById('numeroRecibo').value = numeroReceboAtual;
+            }
+        }
+
+        function adicionarMes() {
+            document.getElementById('modalMes').classList.add('active');
+            const hoje = new Date();
+            document.getElementById('selectMes').value = hoje.getMonth();
+            document.getElementById('selectAno').value = hoje.getFullYear();
+        }
+
+        function fecharModal() {
+            document.getElementById('modalMes').classList.remove('active');
+        }
+
+        function confirmarMes() {
+            const mesIndex = parseInt(document.getElementById('selectMes').value);
+            const ano = parseInt(document.getElementById('selectAno').value);
+            const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+            const mesNome = meses[mesIndex];
+            const mesText = `${mesNome} de ${ano}`;
+
+            if (mesesSelecionados.some(m => m.text === mesText)) {
+                alert('Este mês já foi adicionado');
+                return;
+            }
+
+            mesesSelecionados.push({ mes: mesIndex, ano: ano, text: mesText });
+            renderizarMeses();
+            fecharModal();
+        }
+
+        function removerMes(btn) {
+            const container = document.getElementById('mesosContainer');
+            const items = container.querySelectorAll('div');
+            const index = Array.from(items).indexOf(btn.closest('div'));
+            if (index > -1) {
+                mesesSelecionados.splice(index, 1);
+                renderizarMeses();
+            }
+        }
+
+        function renderizarMeses() {
+            const container = document.getElementById('mesosContainer');
+            container.innerHTML = '';
+
+            if (mesesSelecionados.length === 0) {
+                const div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.gap = '8px';
+                div.innerHTML = `
+                    <input type="text" class="mesInput" placeholder="Janeiro de 2026" readonly style="flex: 1; cursor: pointer; padding: 14px 16px; border: 2px solid #e8e8e8; border-radius: 10px; background-color: #f8f9fa; font-size: 14px; transition: all 0.3s ease;">
+                    <button type="button" class="btnMesRemover" style="background: #f44336; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: none;">×</button>
+                `;
+                container.appendChild(div);
+            } else {
+                mesesSelecionados.forEach((mes) => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.gap = '8px';
+                    div.innerHTML = `
+                        <input type="text" class="mesInput" value="${mes.text}" readonly style="flex: 1; cursor: pointer; padding: 14px 16px; border: 2px solid #e8e8e8; border-radius: 10px; background-color: #f8f9fa; font-size: 14px; transition: all 0.3s ease;">
+                        <button type="button" class="btnMesRemover" onclick="removerMes(this)" style="background: #f44336; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 16px;">×</button>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        function gerarRecibo() {
+            const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
+            const dataRecibo = document.getElementById('dataRecibo').value || new Date().toISOString().split('T')[0];
+            const local = document.getElementById('local').value || 'Porto Alegre, RS';
+            const nomePagador = document.getElementById('nomePagador').value || '';
+            const cimPagador = document.getElementById('cimPagador').value || '';
+            const valor = document.getElementById('valor').value || '0.00';
+
+            if (!nomePagador) {
+                alert('Por favor, preencha o nome de quem pagou');
+                return;
+            }
+
+            if (!valor || valor === '0.00') {
+                alert('Por favor, preencha o valor');
+                return;
+            }
+
+            // Salvar no histórico
+            const dataAgora = new Date();
+            salvarHistorico({
+                numero: numeroRecibo,
+                nome: nomePagador,
+                cim: cimPagador,
+                valor: valor,
+                data: dataAgora.toISOString()
+            });
+
+            incrementarNumeroRecibo();
+
+            const dataFormatada = new Date(dataRecibo + 'T00:00:00').toLocaleDateString('pt-BR');
+            const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const valorExtenso = converterValorExtenso(parseFloat(valor));
+
+            let mesosTexto = '';
+            if (mesesSelecionados.length > 0) {
+                mesosTexto = mesesSelecionados.map(m => m.text).join(' e ');
+            }
+
+            const nomePagadorComCim = cimPagador ? `${nomePagador} - CIM ${cimPagador}` : nomePagador;
+
+            const reciboHTML = `
+                <div class="receipt">
+                    <div class="receipt-header">
+                        <div class="logo-section">
+                            <img src="${logoURL}" alt="Logo Monte Sinai" class="logo-img">
+                        </div>
+                        <div class="organization-info">
+                            <h2>TESOURARIA - RECIBO</h2>
+                            <p>Augusta Respeitável Benfeitora e Excelsa</p>
+                            <p>Loja Simbólica Monte Sinai nº 371</p>
+                            <p>Rito Adonhiramita – Centro Templário</p>
+                            <p>Porto Alegre / RS</p>
+                        </div>
+                        <div class="receipt-number">
+                            <div>Nº</div>
+                            <strong>${numeroRecibo}</strong>
+                        </div>
+                    </div>
+
+                    <div class="receipt-body">
+                        <div class="receipt-field">
+                            <span class="receipt-field-label">Data:</span>
+                            <span class="receipt-field-value">${dataFormatada}</span>
+                        </div>
+
+                        <div class="receipt-field">
+                            <span class="receipt-field-label">Recebido de:</span>
+                            <span class="receipt-field-value">${nomePagadorComCim}</span>
+                        </div>
+
+                        <div class="receipt-field">
+                            <span class="receipt-field-label">Local:</span>
+                            <span class="receipt-field-value">${local}</span>
+                        </div>
+
+                        <div class="receipt-main-text">
+                            <strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).
+                        </div>
+
+                        <div class="receipt-amount">
+                            <div class="receipt-amount-label">VALOR RECEBIDO</div>
+                            <div class="receipt-amount-value">R$ ${valorFormatado}</div>
+                        </div>
+                    </div>
+
+                    <div class="signature-section">
+                        <div style="text-align: center;">
+                            <img src="${assinaturaTesoureiro}" alt="Assinatura Tesoureiro" class="signature-img">
+                            <div class="signature-line">Tesoureiro gestão 2025/2027</div>
+                        </div>
+                    </div>
+
+                    <div class="receipt-footer">
+                        <p>Este recibo é válido como comprovante de pagamento.</p>
+                        <p>Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('preview').innerHTML = reciboHTML;
+            document.getElementById('btnBaixar').style.display = 'block';
+
+            const msgSucesso = document.getElementById('successMessage');
+            msgSucesso.style.display = 'block';
+            setTimeout(() => msgSucesso.style.display = 'none', 3000);
+        }
+
+        function converterValorExtenso(valor) {
+            const unidades = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+            const dezenas_especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+            const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+            const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+            const inteiro = Math.floor(valor);
+            const centavos = Math.round((valor - inteiro) * 100);
+
+            function converterGrupo(num) {
+                if (num === 0) {
+                    return '';
+                } else if (num < 10) {
+                    return unidades[num];
+                } else if (num < 20) {
+                    return dezenas_especiais[num - 10];
+                } else if (num < 100) {
+                    const dezena = Math.floor(num / 10);
+                    const unidade = num % 10;
+                    if (unidade === 0) {
+                        return dezenas[dezena];
+                    } else {
+                        return dezenas[dezena] + ' e ' + unidades[unidade];
+                    }
+                } else {
+                    const centena = Math.floor(num / 100);
+                    const resto = num % 100;
+                    let resultado = centenas[centena];
+                    if (resto === 0) {
+                        return resultado;
+                    } else {
+                        return resultado + ' e ' + converterGrupo(resto);
+                    }
+                }
+            }
+
+            let texto_inteiro = '';
+            if (inteiro === 0) {
+                texto_inteiro = 'zero';
+            } else if (inteiro === 1) {
+                texto_inteiro = 'um';
+            } else if (inteiro < 1000) {
+                texto_inteiro = converterGrupo(inteiro);
+            } else {
+                const milhares = Math.floor(inteiro / 1000);
+                const resto = inteiro % 1000;
+                if (milhares === 1) {
+                    texto_inteiro = 'mil';
+                } else {
+                    texto_inteiro = converterGrupo(milhares) + ' mil';
+                }
+                if (resto > 0) {
+                    texto_inteiro += ' e ' + converterGrupo(resto);
+                }
+            }
+
+            const texto_reais = inteiro === 1 ? ' real' : ' reais';
+            let texto_final = texto_inteiro + texto_reais;
+
+            if (centavos > 0) {
+                if (centavos === 1) {
+                    texto_final += ' e um centavo';
+                } else {
+                    texto_final += ' e ' + centavos + ' centavos';
+                }
+            }
+
+            return texto_final;
+        }
+
+        function baixarRecibo() {
+            const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-01';
+            const btnBaixar = document.getElementById('btnBaixar');
+            
+            try {
+                btnBaixar.disabled = true;
+                btnBaixar.textContent = '⏳ Processando...';
+
+                const receiptElement = document.querySelector('.receipt');
+                if (!receiptElement) {
+                    throw new Error('Recibo não encontrado. Gere o recibo primeiro.');
+                }
+
+                const printWindow = window.open('', '_blank');
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html lang="pt-BR">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Recibo ${numeroRecibo}</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
+                            body {
+                                font-family: 'Times New Roman', serif;
+                                padding: 20px;
+                                background: white;
+                            }
+                            @media print {
+                                body { margin: 0; padding: 0; }
+                            }
+                            .receipt {
+                                background: white;
+                                padding: 35px;
+                                border: 3px solid #d4af37;
+                                border-radius: 12px;
+                                max-width: 800px;
+                                margin: 0 auto;
+                                font-family: 'Times New Roman', serif;
+                                box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+                            }
+                            .receipt-header {
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                margin-bottom: 30px;
+                                border-bottom: 4px solid #d4af37;
+                                padding-bottom: 25px;
+                                background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
+                            }
+                            .logo-section {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 10px;
+                            }
+                            .logo-img {
+                                width: 100px;
+                                height: 100px;
+                                border-radius: 50%;
+                                box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+                                border: 5px solid #d4af37;
+                                object-fit: cover;
+                            }
+                            .organization-info {
+                                text-align: center;
+                                flex: 1;
+                            }
+                            .organization-info h2 {
+                                color: #d4af37;
+                                font-size: 14px;
+                                margin: 0;
+                                font-weight: bold;
+                                letter-spacing: 2px;
+                                text-transform: uppercase;
+                            }
+                            .organization-info p {
+                                color: #1a3a7a;
+                                font-size: 11px;
+                                margin: 3px 0;
+                                font-weight: 500;
+                            }
+                            .receipt-number { text-align: right; font-size: 12px; }
+                            .receipt-number strong { font-size: 16px; color: #1a3a7a; }
+                            .receipt-body { margin-bottom: 20px; }
+                            .receipt-field {
+                                display: flex;
+                                justify-content: space-between;
+                                margin-bottom: 15px;
+                                border-bottom: 1px dotted #999;
+                                padding-bottom: 8px;
+                                font-size: 12px;
+                            }
+                            .receipt-field-label { font-weight: bold; color: #1a3a7a; }
+                            .receipt-field-value { color: #333; text-align: right; }
+                            .receipt-main-text {
+                                background: #f9f9f9;
+                                padding: 15px;
+                                border-left: 4px solid #d4af37;
+                                margin: 20px 0;
+                                font-size: 12px;
+                                line-height: 1.8;
+                            }
+                            .receipt-amount {
+                                background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+                                padding: 25px;
+                                border-radius: 12px;
+                                text-align: center;
+                                margin: 25px 0;
+                                color: #d4af37;
+                                box-shadow: 0 10px 30px rgba(26, 58, 122, 0.3);
+                            }
+                            .receipt-amount-label { font-size: 12px; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px; }
+                            .receipt-amount-value { font-size: 32px; font-weight: bold; color: #d4af37; }
+                            .receipt-footer {
+                                text-align: center;
+                                border-top: 2px solid #1a3a7a;
+                                padding-top: 15px;
+                                margin-top: 30px;
+                                font-size: 10px;
+                                color: #666;
+                            }
+                            .signature-section {
+                                display: flex;
+                                justify-content: center;
+                                gap: 40px;
+                                margin-top: 50px;
+                                text-align: center;
+                                padding-top: 25px;
+                                border-top: 2px dotted #d4af37;
+                            }
+                            .signature-img {
+                                max-width: 120px;
+                                height: auto;
+                                margin-bottom: 15px;
+                            }
+                            .signature-line {
+                                border-top: 2px solid #1a3a7a;
+                                padding-top: 8px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                color: #1a3a7a;
+                                text-transform: uppercase;
+                                letter-spacing: 1px;
+                            }
+                        </style>
+                    </head>
+                    <body onload="window.print(); setTimeout(function(){ window.close(); }, 500);">
+                        ${receiptElement.outerHTML}
+                    </body>
+                    </html>
+                `;
+
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+
+                setTimeout(function() {
+                    btnBaixar.disabled = false;
+                    btnBaixar.textContent = '📥 Baixar PDF';
+                }, 2000);
+
+            } catch(error) {
+                console.error('Erro:', error.message);
+                btnBaixar.disabled = false;
+                btnBaixar.textContent = '📥 Baixar PDF';
+                alert('Erro ao gerar PDF:\n\n' + error.message);
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('numeroRecibo').value = numeroReceboAtual;
+            document.getElementById('dataRecibo').valueAsDate = new Date();
+            document.getElementById('local').value = 'Porto Alegre, RS';
+            document.getElementById('nomePagador').value = '';
+            document.getElementById('cimPagador').value = '';
+            document.getElementById('valor').value = '';
+            document.getElementById('descricao').value = '';
+            mesesSelecionados = [];
+            renderizarMeses();
+            document.getElementById('preview').innerHTML = '<div class="empty-preview">Preencha os dados e clique em "Gerar Recibo" para visualizar aqui</div>';
+            document.getElementById('btnBaixar').style.display = 'none';
+        }
+
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('modalMes');
+            const modalEditor = document.getElementById('modalEditorRecibo');
+            const modalHistorico = document.getElementById('modalHistorico');
+            if (e.target === modal) fecharModal();
+            if (e.target === modalEditor) fecharEditorRecibo();
+            if (e.target === modalHistorico) fecharHistorico();
+        });
+
+        document.getElementById('descricao').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                gerarRecibo();
+            }
+        });
+    </script>
+</body>
+</html>
