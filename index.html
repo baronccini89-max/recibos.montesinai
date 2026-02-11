@@ -1323,8 +1323,40 @@
             return extenso;
         }
 
+        // ==========================================
+        //  FUNÇÃO CORRIGIDA PARA NOME DO ARQUIVO
+        // ==========================================
         function baixarRecibo() {
+            // 1. Capturar dados
+            const numero = document.getElementById('numeroRecibo').value;
+            const nome = document.getElementById('nomePagador').value;
+            const cim = document.getElementById('cimPagador').value;
+
+            // 2. Formatar meses (ex: Janeiro de 2026)
+            // Se houver mais de um, separa por vírgula.
+            // Removemos " de " para ficar igual ao seu exemplo: "Janeiro 2026"
+            let mesesTexto = '';
+            if (mesesSelecionados.length > 0) {
+                mesesTexto = mesesSelecionados.map(m => m.text.replace(' de ', ' ')).join(', ');
+            } else {
+                mesesTexto = 'Sem Mês';
+            }
+
+            // 3. Montar o nome do arquivo (Título da página)
+            // Ex: Recibo 2026-21 - Sidney Ochman - CIM 10250 - Janeiro 2026
+            const nomeCim = cim ? `${nome} - CIM ${cim}` : nome;
+            const novoTitulo = `Recibo ${numero} - ${nomeCim} - ${mesesTexto}`;
+
+            // 4. Trocar título e Imprimir
+            const tituloOriginal = document.title;
+            document.title = novoTitulo;
+
             window.print();
+
+            // 5. Restaurar título original depois de um tempo
+            setTimeout(() => {
+                document.title = tituloOriginal;
+            }, 2000);
         }
 
         function limparFormulario() {
