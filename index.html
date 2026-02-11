@@ -174,14 +174,15 @@
             font-size: 16px;
         }
 
+        /* Estilo padrão do preview (NA TELA) */
         #preview {
             background: #f9f9f9;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
             padding: 20px;
             min-height: 400px;
-            overflow-y: auto;
-            max-height: 600px;
+            overflow-y: auto; /* Isso causa a rolagem na tela */
+            max-height: 600px; /* Isso limita a altura na tela */
             font-size: 13px;
             line-height: 1.6;
         }
@@ -552,74 +553,78 @@
         }
 
         /* =========================================
-           CORREÇÃO DE IMPRESSÃO - ATUALIZADA
+           CORREÇÃO DE IMPRESSÃO - VERSÃO FINAL CORRIGIDA
            =========================================
         */
         @media print {
-            /* 1. Configuração da Página: Remove cabeçalhos e rodapés do navegador */
+            /* 1. Limpa cabeçalho e rodapé do navegador */
             @page {
-                size: auto;
-                margin: 0mm;
+                size: A4;
+                margin: 0;
             }
 
-            /* 2. Ocultar tudo que não seja o recibo */
+            /* 2. Oculta TODOS os elementos da página por padrão */
             body * {
                 visibility: hidden;
             }
 
-            /* 3. Configurar o Body para centralizar o recibo na folha */
+            /* 3. Reseta o corpo da página para ocupar todo o espaço */
             body, html {
-                background: white !important;
-                height: 100vh;
-                width: 100vw;
-                overflow: hidden; /* Evita segunda página em branco */
-                margin: 0 !important;
-                padding: 0 !important;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                background-color: white !important;
+                overflow: visible !important; /* Importante: permite que o conteúdo flua */
             }
 
-            /* 4. Mostrar e Posicionar o Preview */
-            #preview {
+            /* 4. Torna visível apenas o container do recibo */
+            #preview, #preview * {
                 visibility: visible;
-                position: fixed;
+            }
+
+            /* 5. Posicionamento e dimensionamento do Preview para Impressão
+               AQUI ESTAVA O ERRO: Removemos o overflow e max-height para não cortar */
+            #preview {
+                position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                height: 100%;
                 margin: 0;
                 padding: 0;
+                
+                /* CRUCIAL: Reseta as propriedades de rolagem da tela */
+                overflow: visible !important;
+                max-height: none !important;
+                height: auto !important;
+                display: block !important;
+                
                 border: none !important;
                 background: white !important;
-                display: flex;
-                align-items: center; /* Centraliza Verticalmente */
-                justify-content: center; /* Centraliza Horizontalmente */
             }
 
-            /* 5. Estilo do Recibo na Impressão */
+            /* 6. Estilização do Recibo no papel */
             .receipt {
-                visibility: visible;
                 width: 100%;
-                max-width: 800px; /* Largura padrão confortável para A4 */
-                margin: 0 auto;
+                max-width: 800px; /* Largura segura para A4 */
+                margin: 20px auto; /* Centraliza horizontalmente com margem no topo */
                 border: 2px solid #d4af37 !important;
                 box-shadow: none !important;
-                /* Escala leve para garantir que caiba sem cortes */
-                transform: scale(0.95);
+                
+                /* Pequeno ajuste de escala para garantir que caiba em uma folha se for longo */
+                transform: scale(0.95); 
+                transform-origin: top center;
             }
 
-            /* Garante que o conteúdo interno do recibo apareça */
-            #preview * {
-                visibility: visible;
+            /* Esconde elementos de ajuda */
+            .empty-preview, .preview-title {
+                display: none !important;
             }
-
-            /* Forçar cores exatas (Chrome/Edge/Safari) */
+            
+            /* Garante cores exatas na impressão */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-            }
-
-            /* Esconde textos de ajuda do preview */
-            .empty-preview, .preview-title {
-                display: none !important;
             }
         }
     </style>
