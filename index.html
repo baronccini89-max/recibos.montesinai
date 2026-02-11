@@ -174,15 +174,14 @@
             font-size: 16px;
         }
 
-        /* Estilo padrão do preview (NA TELA) */
         #preview {
             background: #f9f9f9;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
             padding: 20px;
             min-height: 400px;
-            overflow-y: auto; /* Isso causa a rolagem na tela */
-            max-height: 600px; /* Isso limita a altura na tela */
+            overflow-y: auto;
+            max-height: 600px;
             font-size: 13px;
             line-height: 1.6;
         }
@@ -553,75 +552,73 @@
         }
 
         /* =========================================
-           CORREÇÃO DE IMPRESSÃO - VERSÃO FINAL CORRIGIDA
+           CORREÇÃO DE IMPRESSÃO - FORÇAR 1 PÁGINA
            =========================================
         */
         @media print {
-            /* 1. Limpa cabeçalho e rodapé do navegador */
+            /* 1. Define margens zero para a página física */
             @page {
                 size: A4;
                 margin: 0;
             }
 
-            /* 2. Oculta TODOS os elementos da página por padrão */
+            /* 2. Oculta tudo que não seja o recibo */
             body * {
                 visibility: hidden;
             }
 
-            /* 3. Reseta o corpo da página para ocupar todo o espaço */
+            /* 3. Bloqueia scroll e força altura exata para não gerar 2ª página */
             body, html {
                 margin: 0;
                 padding: 0;
                 width: 100%;
-                height: 100%;
+                height: 100vh; /* Altura da viewport */
                 background-color: white !important;
-                overflow: visible !important; /* Importante: permite que o conteúdo flua */
+                overflow: hidden !important; /* CRUCIAL: Corta qualquer excesso que geraria página 2 */
             }
 
-            /* 4. Torna visível apenas o container do recibo */
+            /* 4. Torna visível apenas o container do recibo e filhos */
             #preview, #preview * {
                 visibility: visible;
             }
 
-            /* 5. Posicionamento e dimensionamento do Preview para Impressão
-               AQUI ESTAVA O ERRO: Removemos o overflow e max-height para não cortar */
+            /* 5. Centraliza o recibo usando POSITION FIXED
+               Isso tira o recibo do fluxo normal e o coloca exatamente no meio da tela/papel */
             #preview {
-                position: absolute;
-                left: 0;
+                position: fixed;
                 top: 0;
+                left: 0;
                 width: 100%;
-                margin: 0;
-                padding: 0;
-                
-                /* CRUCIAL: Reseta as propriedades de rolagem da tela */
-                overflow: visible !important;
-                max-height: none !important;
-                height: auto !important;
-                display: block !important;
-                
-                border: none !important;
+                height: 100%;
+                display: flex;
+                justify-content: center; /* Centraliza Horizontalmente */
+                align-items: center;     /* Centraliza Verticalmente */
                 background: white !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                z-index: 9999;
             }
 
-            /* 6. Estilização do Recibo no papel */
+            /* 6. Ajuste do Recibo */
             .receipt {
                 width: 100%;
-                max-width: 800px; /* Largura segura para A4 */
-                margin: 20px auto; /* Centraliza horizontalmente com margem no topo */
+                max-width: 800px;
                 border: 2px solid #d4af37 !important;
                 box-shadow: none !important;
+                margin: 0 !important;
                 
-                /* Pequeno ajuste de escala para garantir que caiba em uma folha se for longo */
-                transform: scale(0.95); 
-                transform-origin: top center;
+                /* Reduz um pouco (90%) para garantir que cabe nas margens de segurança da impressora */
+                transform: scale(0.9);
+                transform-origin: center;
             }
 
-            /* Esconde elementos de ajuda */
+            /* Esconde elementos auxiliares */
             .empty-preview, .preview-title {
                 display: none !important;
             }
             
-            /* Garante cores exatas na impressão */
+            /* Garante cores exatas */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
