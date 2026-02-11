@@ -885,6 +885,9 @@
 
         let mesesSelecionados = [];
         let numeroReceboAtual = '2026-02';
+        
+        // VARIÁVEL PARA GUARDAR O NÚMERO DO RECIBO ATUALMENTE GERADO
+        let numeroReciboGerado = '';
 
         // ========== FUNÇÕES FIREBASE ==========
 
@@ -1172,7 +1175,12 @@
         }
 
         async function gerarRecibo() {
+            // CORREÇÃO: Capturamos o valor ANTES de incrementar
             const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
+            
+            // Salvamos na variável global para usar no download
+            numeroReciboGerado = numeroRecibo;
+
             const dataRecibo = document.getElementById('dataRecibo').value || new Date().toISOString().split('T')[0];
             const local = document.getElementById('local').value || 'Porto Alegre, RS';
             const nomePagador = document.getElementById('nomePagador').value || '';
@@ -1323,37 +1331,33 @@
             return extenso;
         }
 
-        // ==========================================
-        //  FUNÇÃO CORRIGIDA PARA NOME DO ARQUIVO
-        // ==========================================
         function baixarRecibo() {
-            // 1. Capturar dados
-            const numero = document.getElementById('numeroRecibo').value;
+            // 1. Capturar dados (USANDO A MEMÓRIA GRAVADA NA GERAÇÃO)
+            // Se por algum motivo a memória estiver vazia, usa o input (fallback)
+            const numero = numeroReciboGerado || document.getElementById('numeroRecibo').value;
             const nome = document.getElementById('nomePagador').value;
             const cim = document.getElementById('cimPagador').value;
 
             // 2. Formatar meses (ex: Janeiro de 2026)
-            // Se houver mais de um, separa por vírgula.
-            // Removemos " de " para ficar igual ao seu exemplo: "Janeiro 2026"
             let mesesTexto = '';
             if (mesesSelecionados.length > 0) {
+                // Remove " de " para ficar mais curto no nome do arquivo
                 mesesTexto = mesesSelecionados.map(m => m.text.replace(' de ', ' ')).join(', ');
             } else {
-                mesesTexto = 'Sem Mês';
+                mesesTexto = 'S-Mes';
             }
 
             // 3. Montar o nome do arquivo (Título da página)
-            // Ex: Recibo 2026-21 - Sidney Ochman - CIM 10250 - Janeiro 2026
             const nomeCim = cim ? `${nome} - CIM ${cim}` : nome;
             const novoTitulo = `Recibo ${numero} - ${nomeCim} - ${mesesTexto}`;
 
-            // 4. Trocar título e Imprimir
+            // 4. Trocar título temporariamente
             const tituloOriginal = document.title;
             document.title = novoTitulo;
 
             window.print();
 
-            // 5. Restaurar título original depois de um tempo
+            // 5. Restaurar título original
             setTimeout(() => {
                 document.title = tituloOriginal;
             }, 2000);
@@ -1365,6 +1369,7 @@
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             mesesSelecionados = [];
+            numeroReciboGerado = ''; // Limpa a memória também
             renderizarMeses();
             document.getElementById('preview').innerHTML = '<div class="empty-preview">Preencha os dados e clique em "Gerar Recibo" para visualizar aqui</div>';
             document.getElementById('btnBaixar').style.display = 'none';
