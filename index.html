@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gerador de Recibos - Monte Sinai</title>
     <style>
         /* ================= ESTILOS GERAIS (TELA) ================= */
@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Remove flash de toque no mobile */
         }
 
         body {
@@ -29,18 +30,12 @@
             max-width: 1400px;
             width: 100%;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr; /* Desktop: 2 colunas */
             gap: 40px;
             padding: 50px;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
+        /* Títulos e Textos */
         h1 {
             grid-column: 1 / -1;
             color: #1a3a7a;
@@ -74,6 +69,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Campos de Entrada */
         input, textarea, select {
             padding: 14px 16px;
             border: 2px solid #e8e8e8;
@@ -82,6 +78,7 @@
             font-family: inherit;
             transition: all 0.3s ease;
             background-color: #f8f9fa;
+            width: 100%;
         }
 
         input:focus, textarea:focus, select:focus {
@@ -102,6 +99,7 @@
             gap: 15px;
         }
 
+        /* Botões */
         .buttons {
             display: flex;
             gap: 12px;
@@ -127,9 +125,9 @@
             color: white;
         }
 
-        .btn-generate:hover {
+        .btn-generate:hover, .btn-download:hover, .btn-clear:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(26, 58, 122, 0.4);
+            opacity: 0.9;
         }
 
         .btn-download {
@@ -137,36 +135,19 @@
             color: white;
         }
 
-        .btn-download:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
-        }
-
         .btn-clear {
             background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
             color: white;
         }
 
-        .btn-clear:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(244, 67, 54, 0.4);
-        }
-
+        /* Área de Preview (Visualização na Tela) */
         .preview-section {
             border-left: 2px solid #e0e0e0;
             padding-left: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-        }
-
-        @media (max-width: 768px) {
-            .preview-section {
-                border-left: none;
-                border-top: 2px solid #e0e0e0;
-                padding-left: 0;
-                padding-top: 30px;
-            }
+            min-width: 0; /* Evita estouro no grid */
         }
 
         .preview-title {
@@ -181,20 +162,22 @@
             border-radius: 6px;
             padding: 20px;
             min-height: 400px;
-            overflow-y: auto;
+            overflow-y: auto; /* Scroll vertical se necessário */
             max-height: 600px;
             font-size: 13px;
             line-height: 1.6;
         }
 
+        /* Estilo Visual do Recibo */
         .receipt {
             background: white;
             padding: 35px;
             border: 3px solid #d4af37;
             border-radius: 12px;
-            page-break-after: always;
             font-family: 'Times New Roman', serif;
             box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+            /* Garante largura mínima para manter layout bonito na tela */
+            min-width: 600px; 
         }
 
         .receipt-header {
@@ -224,410 +207,198 @@
             display: block;
         }
 
-        .organization-info {
-            text-align: center;
-            flex: 1;
-        }
-
+        .organization-info { text-align: center; flex: 1; }
         .organization-info h2 {
-            color: #d4af37;
-            font-size: 16px;
-            margin: 0;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            color: #d4af37; font-size: 16px; margin: 0; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
         }
-
         .organization-info p {
-            color: #1a3a7a;
-            font-size: 12px;
-            margin: 3px 0;
-            font-weight: 500;
+            color: #1a3a7a; font-size: 12px; margin: 3px 0; font-weight: 500;
         }
 
-        .receipt-number {
-            text-align: right;
-            font-size: 12px;
-        }
+        .receipt-number { text-align: right; font-size: 12px; }
+        .receipt-number strong { font-size: 18px; color: #1a3a7a; }
 
-        .receipt-number strong {
-            font-size: 18px;
-            color: #1a3a7a;
-        }
-
-        .receipt-body {
-            margin-bottom: 20px;
-        }
+        .receipt-body { margin-bottom: 20px; }
 
         .receipt-field {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            border-bottom: 1px dotted #999;
-            padding-bottom: 8px;
-            font-size: 13px;
+            display: flex; justify-content: space-between; margin-bottom: 15px;
+            border-bottom: 1px dotted #999; padding-bottom: 8px; font-size: 13px;
         }
-
-        .receipt-field-label {
-            font-weight: bold;
-            color: #1a3a7a;
-        }
-
-        .receipt-field-value {
-            color: #333;
-            text-align: right;
-        }
+        .receipt-field-label { font-weight: bold; color: #1a3a7a; }
+        .receipt-field-value { color: #333; text-align: right; }
 
         .receipt-main-text {
-            background: #f9f9f9;
-            padding: 15px;
-            border-left: 4px solid #d4af37;
-            margin: 20px 0;
-            font-size: 12px;
-            line-height: 1.8;
+            background: #f9f9f9; padding: 15px; border-left: 4px solid #d4af37;
+            margin: 20px 0; font-size: 12px; line-height: 1.8;
         }
 
         .receipt-amount {
             background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 25px 0;
-            color: #d4af37;
-            box-shadow: 0 10px 30px rgba(26, 58, 122, 0.3);
+            padding: 25px; border-radius: 12px; text-align: center; margin: 25px 0;
+            color: #d4af37; box-shadow: 0 10px 30px rgba(26, 58, 122, 0.3);
         }
-
-        .receipt-amount-label {
-            font-size: 13px;
-            margin-bottom: 10px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .receipt-amount-value {
-            font-size: 40px;
-            font-weight: bold;
-            color: #d4af37;
-        }
+        .receipt-amount-label { font-size: 13px; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px; }
+        .receipt-amount-value { font-size: 40px; font-weight: bold; color: #d4af37; }
 
         .receipt-footer {
-            text-align: center;
-            border-top: 2px solid #1a3a7a;
-            padding-top: 15px;
-            margin-top: 30px;
-            font-size: 11px;
-            color: #666;
+            text-align: center; border-top: 2px solid #1a3a7a; padding-top: 15px; margin-top: 30px; font-size: 11px; color: #666;
         }
 
         .signature-section {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 40px;
-            margin-top: 50px;
-            text-align: center;
-            padding-top: 25px;
-            border-top: 2px dotted #d4af37;
+            display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 50px;
+            text-align: center; padding-top: 25px; border-top: 2px dotted #d4af37;
         }
-
         .signature-line {
-            border-top: 2px solid #1a3a7a;
-            padding-top: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a3a7a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            border-top: 2px solid #1a3a7a; padding-top: 8px; font-size: 13px; font-weight: 600; color: #1a3a7a; text-transform: uppercase; letter-spacing: 1px;
         }
+        .signature-img { max-width: 150px; height: auto; margin-bottom: 15px; }
 
-        .signature-img {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 15px;
-        }
+        .empty-preview { color: #999; text-align: center; padding: 40px 20px; }
 
-        .empty-preview {
-            color: #999;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
+        /* Elementos de Interface (Modal, Mensagens) */
         .success-message {
-            display: none;
-            background: #4CAF50;
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            margin-bottom: 15px;
-            animation: slideIn 0.3s ease;
+            display: none; background: #4CAF50; color: white; padding: 12px; border-radius: 6px; text-align: center; margin-bottom: 15px; animation: slideIn 0.3s ease;
         }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
+            background: white; border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;
         }
-
-        .modal-content h3 {
-            color: #1a3a7a;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-cancel {
-            background: #f5f5f5;
-            color: #333;
-        }
-
-        .btn-confirm {
-            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
-            color: white;
-        }
+        .modal-content h3 { color: #1a3a7a; margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-cancel { background: #f5f5f5; color: #333; }
+        .btn-confirm { background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%); color: white; }
 
         .historico-item {
-            background: #f0f7ff;
-            border: 1px solid #d4af37;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-left: 4px solid #d4af37;
+            background: #f0f7ff; border: 1px solid #d4af37; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; border-left: 4px solid #d4af37;
         }
+        .historico-item:hover { background: #e3f2fd; transform: translateX(5px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2); }
+        .historico-numero { font-weight: bold; color: #1a3a7a; font-size: 14px; }
+        .historico-detalhes { font-size: 12px; color: #666; margin-top: 5px; }
+        .historico-data { font-size: 11px; color: #999; margin-top: 3px; }
 
-        .historico-item:hover {
-            background: #e3f2fd;
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
-        }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+        .tab-button { flex: 1; padding: 12px; border: none; background: transparent; color: #1a3a7a; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; text-transform: uppercase; font-size: 13px; }
+        .tab-button.active { color: #d4af37; border-bottom-color: #d4af37; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .historico-vazio { text-align: center; color: #999; padding: 20px; font-size: 14px; }
 
-        .historico-numero {
-            font-weight: bold;
-            color: #1a3a7a;
-            font-size: 14px;
-        }
+        .btn-historico { background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; flex: 0; padding: 12px 16px; font-size: 13px; gap: 5px; display: flex; align-items: center; }
+        .btn-historico:hover { background: #1a3a7a; color: white; }
 
-        .historico-detalhes {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
+        .loading-indicator { display: none; background: #2196F3; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 14px; }
+        .loading-indicator.show { display: block; }
+        .info-badge { background: #e3f2fd; color: #1a3a7a; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-top: 10px; border-left: 4px solid #d4af37; }
 
-        .historico-data {
-            font-size: 11px;
-            color: #999;
-            margin-top: 3px;
-        }
+        /* ==================================================
+           CONFIGURAÇÃO ESPECÍFICA PARA MOBILE (TELA)
+           (Ajusta o layout para caber no celular)
+           ================================================== */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+                display: block; /* Remove flex center */
+            }
 
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-        }
+            .container {
+                display: flex;
+                flex-direction: column; /* Coloca formulário e preview um em cima do outro */
+                gap: 25px;
+                padding: 25px 20px;
+                margin-bottom: 20px;
+            }
 
-        .tab-button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: transparent;
-            color: #1a3a7a;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            font-size: 13px;
-        }
+            h1 { font-size: 24px; margin-bottom: 20px; }
 
-        .tab-button.active {
-            color: #d4af37;
-            border-bottom-color: #d4af37;
-        }
+            .preview-section {
+                border-left: none;
+                border-top: 2px solid #e0e0e0;
+                padding-left: 0;
+                padding-top: 25px;
+                width: 100%;
+                overflow-x: hidden;
+            }
 
-        .tab-content {
-            display: none;
-        }
+            /* Permite scroll horizontal no recibo para não quebrar o layout */
+            #preview {
+                padding: 15px;
+                min-height: 300px;
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch;
+            }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        .historico-vazio {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-            font-size: 14px;
-        }
-
-        .btn-historico {
-            background: #e3f2fd;
-            color: #1a3a7a;
-            border: 2px solid #1a3a7a;
-            flex: 0;
-            padding: 12px 16px;
-            font-size: 13px;
-            gap: 5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-historico:hover {
-            background: #1a3a7a;
-            color: white;
-        }
-
-        .loading-indicator {
-            display: none;
-            background: #2196F3;
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .loading-indicator.show {
-            display: block;
-        }
-
-        .info-badge {
-            background: #e3f2fd;
-            color: #1a3a7a;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-top: 10px;
-            border-left: 4px solid #d4af37;
+            .buttons { flex-direction: column; } /* Botões empilhados */
+            button { padding: 18px; font-size: 14px; } /* Botões maiores para toque */
+            .row { grid-template-columns: 1fr; gap: 15px; } /* Inputs em uma coluna */
         }
 
         /* =========================================
-           CORREÇÃO DEFINITIVA DE IMPRESSÃO
+           CONFIGURAÇÃO DE IMPRESSÃO (PDF)
+           (Funciona igual em PC e Mobile)
            =========================================
         */
         @media print {
-            /* 1. RESET TOTAL DO CORPO E HTML */
-            html, body {
-                background: white !important; /* Remove o fundo azul/dourado */
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+
+            /* Oculta o desnecessário */
+            body * { visibility: hidden; }
+            .form-section, h1, .preview-title, .empty-preview, .buttons { display: none !important; }
+
+            /* Reseta o corpo da página */
+            html, body, .container {
+                background: white !important;
                 width: 100% !important;
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: visible !important; /* Permite que o conteúdo flua sem scroll */
-                display: block !important; /* Remove comportamento Flexbox que centraliza */
-            }
-
-            /* 2. RESET DO CONTAINER PRINCIPAL */
-            .container {
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                overflow: visible !important;
+                display: block !important;
                 border: none !important;
                 box-shadow: none !important;
-                background: white !important;
-                display: block !important;
             }
 
-            /* 3. REMOÇÃO DE ELEMENTOS QUE CAUSAM PÁGINA EXTRA */
-            /* "Desliga" o formulário, o título e botões da renderização */
-            .form-section, 
-            h1, 
-            .preview-title, 
-            .empty-preview,
-            .buttons {
-                display: none !important;
-            }
-
-            /* 4. CONFIGURAÇÃO DA CAIXA DE PREVIEW */
+            /* Configura o Preview para impressão */
             #preview {
                 display: block !important;
-                position: relative !important; /* Volta ao fluxo normal */
+                position: relative !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
                 background: white !important;
-                
-                /* CRUCIAL: Remove scrollbars e limites de altura */
                 overflow: visible !important;
                 max-height: none !important;
                 height: auto !important;
             }
 
-            /* 5. CONFIGURAÇÃO DO RECIBO */
+            /* Configura o Recibo no papel */
             .receipt {
+                visibility: visible;
                 width: 100% !important;
                 max-width: 100% !important;
+                min-width: 0 !important; /* Reseta a largura mínima do mobile */
                 margin: 0 !important;
                 border: 2px solid #d4af37 !important;
                 box-shadow: none !important;
-                
-                /* Garante que não quebre página no meio */
                 page-break-inside: avoid;
             }
+            
+            /* Garante visibilidade dos filhos */
+            .receipt * { visibility: visible; }
 
-            /* 6. GARANTIA DE CORES */
+            /* Garante cores */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-            }
-
-            /* 7. DEFINIÇÃO DA PÁGINA A4 */
-            @page {
-                size: A4;
-                margin: 10mm; /* Margem de segurança para impressora */
             }
         }
     </style>
