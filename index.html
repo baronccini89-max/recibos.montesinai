@@ -525,6 +525,31 @@
             background: #1a3a7a;
             color: white;
         }
+
+        .loading-indicator {
+            display: none;
+            background: #2196F3;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .loading-indicator.show {
+            display: block;
+        }
+
+        .info-badge {
+            background: #e3f2fd;
+            color: #1a3a7a;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 10px;
+            border-left: 4px solid #d4af37;
+        }
     </style>
 </head>
 <body>
@@ -532,15 +557,19 @@
         <h1>📜 Gerador de Recibos - Loja Monte Sinai</h1>
 
         <div class="form-section">
-            <div class="success-message" id="successMessage">✓ Recibo gerado com sucesso!</div>
+            <div class="loading-indicator" id="loadingIndicator">🔄 Carregando dados do Firebase...</div>
+            <div class="success-message" id="successMessage">✓ Recibo gerado e salvo com sucesso!</div>
 
             <div style="display: flex; gap: 8px; align-items: center;">
                 <div class="form-group" style="flex: 1;">
                     <label for="numeroRecibo">Número do Recibo</label>
                     <input type="text" id="numeroRecibo" placeholder="Ex: 2026-02" value="2026-02" readonly style="background-color: #e8f4f8; cursor: not-allowed;">
+                    <div class="info-badge" id="ultimoReciboInfo">
+                        📋 Último recibo: Carregando...
+                    </div>
                 </div>
-                <button type="button" onclick="abrirEditorRecibo()" style="background: #1a3a7a; color: white; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s; text-transform: uppercase; align-self: flex-end; margin-bottom: 0;">✏️ Editar</button>
-                <button type="button" onclick="abrirHistorico()" class="btn-historico" style="align-self: flex-end; margin-bottom: 0;">📋 Histórico</button>
+                <button type="button" onclick="abrirEditorRecibo()" style="background: #1a3a7a; color: white; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s; text-transform: uppercase; align-self: flex-end; margin-bottom: 34px;">✏️ Editar</button>
+                <button type="button" onclick="abrirHistorico()" class="btn-historico" style="align-self: flex-end; margin-bottom: 34px;">📋 Histórico</button>
             </div>
 
             <div id="modalEditorRecibo" class="modal">
@@ -561,7 +590,7 @@
                 <div class="modal-content">
                     <h3>📋 Histórico de Recibos</h3>
                     <div class="tab-buttons">
-                        <button class="tab-button active" onclick="mudarAbaHistorico('ultimos')">Últimos 3</button>
+                        <button class="tab-button active" onclick="mudarAbaHistorico('ultimos')">Últimos 10</button>
                         <button class="tab-button" onclick="mudarAbaHistorico('todos')">Todos</button>
                     </div>
                     <div id="tab-ultimos" class="tab-content active">
@@ -668,6 +697,35 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // 🔥 COLE AQUI SUAS CREDENCIAIS DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Disponibilizar globalmente
+        window.db = db;
+        window.firestore = { collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc };
+
+        console.log('✅ Firebase inicializado com sucesso!');
+        
+        // Carregar último recibo ao iniciar
+        carregarUltimoRecibo();
+    </script>
+
     <script>
         document.getElementById('dataRecibo').valueAsDate = new Date();
 
@@ -749,41 +807,162 @@
         let mesesSelecionados = [];
         let numeroReceboAtual = '2026-02';
 
-        // FUNÇÕES DE HISTÓRICO
-        function salvarHistorico(recibo) {
-            let historico = JSON.parse(localStorage.getItem('historicoRecibos')) || [];
-            historico.unshift(recibo);
-            localStorage.setItem('historicoRecibos', JSON.stringify(historico));
+        // ========== FUNÇÕES FIREBASE ==========
+
+        function mostrarLoading(mostrar) {
+            const loading = document.getElementById('loadingIndicator');
+            if (mostrar) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
         }
 
-        function obterHistorico() {
-            return JSON.parse(localStorage.getItem('historicoRecibos')) || [];
+        async function carregarUltimoRecibo() {
+            try {
+                mostrarLoading(true);
+                const q = window.firestore.query(
+                    window.firestore.collection(window.db, 'recibos'),
+                    window.firestore.orderBy('timestamp', 'desc'),
+                    window.firestore.limit(1)
+                );
+                
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const ultimoRecibo = querySnapshot.docs[0].data();
+                    const infoDiv = document.getElementById('ultimoReciboInfo');
+                    infoDiv.innerHTML = `📋 Último recibo: #${ultimoRecibo.numero} - ${ultimoRecibo.nome} - ${new Date(ultimoRecibo.timestamp).toLocaleDateString('pt-BR')}`;
+                    
+                    // Auto-incrementar o número
+                    numeroReceboAtual = incrementarNumero(ultimoRecibo.numero);
+                    document.getElementById('numeroRecibo').value = numeroReceboAtual;
+                } else {
+                    document.getElementById('ultimoReciboInfo').innerHTML = '📋 Nenhum recibo emitido ainda';
+                }
+                
+                mostrarLoading(false);
+            } catch (error) {
+                console.error('Erro ao carregar último recibo:', error);
+                document.getElementById('ultimoReciboInfo').innerHTML = '⚠️ Erro ao carregar dados';
+                mostrarLoading(false);
+            }
         }
 
-        function abrirHistorico() {
+        function incrementarNumero(numeroAtual) {
+            const partes = numeroAtual.split('-');
+            if (partes.length === 2) {
+                const ano = partes[0];
+                const numero = parseInt(partes[1]) + 1;
+                return `${ano}-${String(numero).padStart(2, '0')}`;
+            }
+            return numeroAtual;
+        }
+
+        async function salvarReciboFirebase(dadosRecibo) {
+            try {
+                const docRef = await window.firestore.addDoc(
+                    window.firestore.collection(window.db, 'recibos'),
+                    {
+                        ...dadosRecibo,
+                        timestamp: new Date().toISOString(),
+                        timestampNumerico: Date.now()
+                    }
+                );
+                console.log('✅ Recibo salvo no Firebase:', docRef.id);
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao salvar recibo:', error);
+                alert('Erro ao salvar no banco de dados. Verifique a configuração do Firebase.');
+                return false;
+            }
+        }
+
+        async function carregarHistoricoFirebase() {
+            try {
+                mostrarLoading(true);
+                const q = window.firestore.query(
+                    window.firestore.collection(window.db, 'recibos'),
+                    window.firestore.orderBy('timestamp', 'desc')
+                );
+                
+                const querySnapshot = await window.firestore.getDocs(q);
+                const historico = [];
+                
+                querySnapshot.forEach((doc) => {
+                    historico.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                mostrarLoading(false);
+                return historico;
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                mostrarLoading(false);
+                return [];
+            }
+        }
+
+        async function limparHistoricoFirebase() {
+            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODOS os recibos do banco de dados permanentemente. Tem certeza?')) {
+                return;
+            }
+            
+            try {
+                mostrarLoading(true);
+                const querySnapshot = await window.firestore.getDocs(
+                    window.firestore.collection(window.db, 'recibos')
+                );
+                
+                const deletePromises = [];
+                querySnapshot.forEach((documento) => {
+                    deletePromises.push(
+                        window.firestore.deleteDoc(
+                            window.firestore.doc(window.db, 'recibos', documento.id)
+                        )
+                    );
+                });
+                
+                await Promise.all(deletePromises);
+                alert('✅ Histórico limpo com sucesso!');
+                await renderizarHistorico();
+                await carregarUltimoRecibo();
+                mostrarLoading(false);
+            } catch (error) {
+                console.error('Erro ao limpar histórico:', error);
+                alert('Erro ao limpar histórico. Tente novamente.');
+                mostrarLoading(false);
+            }
+        }
+
+        // ========== FUNÇÕES DE HISTÓRICO ==========
+
+        async function abrirHistorico() {
             document.getElementById('modalHistorico').classList.add('active');
-            renderizarHistorico();
+            await renderizarHistorico();
         }
 
         function fecharHistorico() {
             document.getElementById('modalHistorico').classList.remove('active');
         }
 
-        function renderizarHistorico() {
-            const historico = obterHistorico();
-            const ultimos3 = historico.slice(0, 3);
+        async function renderizarHistorico() {
+            const historico = await carregarHistoricoFirebase();
+            const ultimos10 = historico.slice(0, 10);
 
-            // Aba Últimos 3
+            // Aba Últimos 10
             const divUltimos = document.getElementById('historico-ultimos');
-            if (ultimos3.length === 0) {
+            if (ultimos10.length === 0) {
                 divUltimos.innerHTML = '<div class="historico-vazio">Nenhum recibo gerado ainda</div>';
             } else {
-                divUltimos.innerHTML = ultimos3.map(r => `
+                divUltimos.innerHTML = ultimos10.map(r => `
                     <div class="historico-item" onclick="preencherDoHistorico('${r.nome}', '${r.cim}', '${r.numero}')">
                         <div class="historico-numero">📋 Recibo #${r.numero}</div>
                         <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
                         <div class="historico-detalhes">💰 R$ ${r.valor}</div>
-                        <div class="historico-data">📅 ${new Date(r.data).toLocaleDateString('pt-BR')}</div>
+                        <div class="historico-data">📅 ${new Date(r.timestamp).toLocaleDateString('pt-BR')} às ${new Date(r.timestamp).toLocaleTimeString('pt-BR')}</div>
                     </div>
                 `).join('');
             }
@@ -798,7 +977,7 @@
                         <div class="historico-numero">📋 Recibo #${r.numero}</div>
                         <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
                         <div class="historico-detalhes">💰 R$ ${r.valor}</div>
-                        <div class="historico-data">📅 ${new Date(r.data).toLocaleDateString('pt-BR')}</div>
+                        <div class="historico-data">📅 ${new Date(r.timestamp).toLocaleDateString('pt-BR')} às ${new Date(r.timestamp).toLocaleTimeString('pt-BR')}</div>
                     </div>
                 `).join('');
             }
@@ -807,16 +986,11 @@
         function preencherDoHistorico(nome, cim, numero) {
             document.getElementById('nomePagador').value = nome;
             document.getElementById('cimPagador').value = cim;
-            document.getElementById('numeroRecibo').value = numero;
-            numeroReceboAtual = numero;
             fecharHistorico();
         }
 
-        function limparHistorico() {
-            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
-                localStorage.removeItem('historicoRecibos');
-                renderizarHistorico();
-            }
+        async function limparHistorico() {
+            await limparHistoricoFirebase();
         }
 
         function mudarAbaHistorico(aba) {
@@ -847,13 +1021,8 @@
         }
 
         function incrementarNumeroRecibo() {
-            const partes = numeroReceboAtual.split('-');
-            if (partes.length === 2) {
-                const ano = partes[0];
-                const numero = parseInt(partes[1]) + 1;
-                numeroReceboAtual = `${ano}-${String(numero).padStart(2, '0')}`;
-                document.getElementById('numeroRecibo').value = numeroReceboAtual;
-            }
+            numeroReceboAtual = incrementarNumero(numeroReceboAtual);
+            document.getElementById('numeroRecibo').value = numeroReceboAtual;
         }
 
         function adicionarMes() {
@@ -923,7 +1092,7 @@
             }
         }
 
-        function gerarRecibo() {
+        async function gerarRecibo() {
             const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
             const dataRecibo = document.getElementById('dataRecibo').value || new Date().toISOString().split('T')[0];
             const local = document.getElementById('local').value || 'Porto Alegre, RS';
@@ -941,17 +1110,31 @@
                 return;
             }
 
-            // Salvar no histórico
-            const dataAgora = new Date();
-            salvarHistorico({
+            // Salvar no Firebase
+            const dadosRecibo = {
                 numero: numeroRecibo,
                 nome: nomePagador,
                 cim: cimPagador,
                 valor: valor,
-                data: dataAgora.toISOString()
-            });
+                data: dataRecibo,
+                local: local,
+                meses: mesesSelecionados.map(m => m.text).join(' e ')
+            };
 
-            incrementarNumeroRecibo();
+            const salvou = await salvarReciboFirebase(dadosRecibo);
+            
+            if (salvou) {
+                // Mostrar mensagem de sucesso
+                const msg = document.getElementById('successMessage');
+                msg.style.display = 'block';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3000);
+
+                // Incrementar número e atualizar info
+                incrementarNumeroRecibo();
+                await carregarUltimoRecibo();
+            }
 
             const dataFormatada = new Date(dataRecibo + 'T00:00:00').toLocaleDateString('pt-BR');
             const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1012,271 +1195,60 @@
                     <div class="signature-section">
                         <div style="text-align: center;">
                             <img src="${assinaturaTesoureiro}" alt="Assinatura Tesoureiro" class="signature-img">
-                            <div class="signature-line">Tesoureiro gestão 2025/2027</div>
+                            <div class="signature-line">Tesoureiro gestão 2025/2026</div>
                         </div>
                     </div>
 
                     <div class="receipt-footer">
-                        <p>Este recibo é válido como comprovante de pagamento.</p>
-                        <p>Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+                        Documento gerado eletronicamente em ${new Date().toLocaleDateString('pt-BR')}
                     </div>
                 </div>
             `;
 
             document.getElementById('preview').innerHTML = reciboHTML;
             document.getElementById('btnBaixar').style.display = 'block';
-
-            const msgSucesso = document.getElementById('successMessage');
-            msgSucesso.style.display = 'block';
-            setTimeout(() => msgSucesso.style.display = 'none', 3000);
         }
 
         function converterValorExtenso(valor) {
-            const unidades = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-            const dezenas_especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+            // Implementação simplificada - você pode usar uma biblioteca mais robusta
+            const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
             const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
-            const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
-
-            const inteiro = Math.floor(valor);
-            const centavos = Math.round((valor - inteiro) * 100);
-
-            function converterGrupo(num) {
-                if (num === 0) {
-                    return '';
-                } else if (num < 10) {
-                    return unidades[num];
-                } else if (num < 20) {
-                    return dezenas_especiais[num - 10];
-                } else if (num < 100) {
-                    const dezena = Math.floor(num / 10);
-                    const unidade = num % 10;
-                    if (unidade === 0) {
-                        return dezenas[dezena];
-                    } else {
-                        return dezenas[dezena] + ' e ' + unidades[unidade];
-                    }
-                } else {
-                    const centena = Math.floor(num / 100);
-                    const resto = num % 100;
-                    let resultado = centenas[centena];
-                    if (resto === 0) {
-                        return resultado;
-                    } else {
-                        return resultado + ' e ' + converterGrupo(resto);
-                    }
-                }
-            }
-
-            let texto_inteiro = '';
-            if (inteiro === 0) {
-                texto_inteiro = 'zero';
-            } else if (inteiro === 1) {
-                texto_inteiro = 'um';
-            } else if (inteiro < 1000) {
-                texto_inteiro = converterGrupo(inteiro);
+            const especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+            
+            const partes = valor.toFixed(2).split('.');
+            const reais = parseInt(partes[0]);
+            const centavos = parseInt(partes[1]);
+            
+            let extenso = '';
+            
+            if (reais === 0) {
+                extenso = 'zero reais';
+            } else if (reais === 1) {
+                extenso = 'um real';
+            } else if (reais < 10) {
+                extenso = unidades[reais] + ' reais';
+            } else if (reais < 20) {
+                extenso = especiais[reais - 10] + ' reais';
+            } else if (reais < 100) {
+                const d = Math.floor(reais / 10);
+                const u = reais % 10;
+                extenso = dezenas[d] + (u > 0 ? ' e ' + unidades[u] : '') + ' reais';
             } else {
-                const milhares = Math.floor(inteiro / 1000);
-                const resto = inteiro % 1000;
-                if (milhares === 1) {
-                    texto_inteiro = 'mil';
-                } else {
-                    texto_inteiro = converterGrupo(milhares) + ' mil';
-                }
-                if (resto > 0) {
-                    texto_inteiro += ' e ' + converterGrupo(resto);
-                }
+                extenso = reais + ' reais';
             }
-
-            const texto_reais = inteiro === 1 ? ' real' : ' reais';
-            let texto_final = texto_inteiro + texto_reais;
-
+            
             if (centavos > 0) {
-                if (centavos === 1) {
-                    texto_final += ' e um centavo';
-                } else {
-                    texto_final += ' e ' + centavos + ' centavos';
-                }
+                extenso += ' e ' + centavos + ' centavos';
             }
-
-            return texto_final;
+            
+            return extenso;
         }
 
         function baixarRecibo() {
-            const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-01';
-            const btnBaixar = document.getElementById('btnBaixar');
-            
-            try {
-                btnBaixar.disabled = true;
-                btnBaixar.textContent = '⏳ Processando...';
-
-                const receiptElement = document.querySelector('.receipt');
-                if (!receiptElement) {
-                    throw new Error('Recibo não encontrado. Gere o recibo primeiro.');
-                }
-
-                const printWindow = window.open('', '_blank');
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html lang="pt-BR">
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Recibo ${numeroRecibo}</title>
-                        <style>
-                            * {
-                                margin: 0;
-                                padding: 0;
-                                box-sizing: border-box;
-                            }
-                            body {
-                                font-family: 'Times New Roman', serif;
-                                padding: 20px;
-                                background: white;
-                            }
-                            @media print {
-                                body { margin: 0; padding: 0; }
-                            }
-                            .receipt {
-                                background: white;
-                                padding: 35px;
-                                border: 3px solid #d4af37;
-                                border-radius: 12px;
-                                max-width: 800px;
-                                margin: 0 auto;
-                                font-family: 'Times New Roman', serif;
-                                box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
-                            }
-                            .receipt-header {
-                                display: flex;
-                                align-items: center;
-                                justify-content: space-between;
-                                margin-bottom: 30px;
-                                border-bottom: 4px solid #d4af37;
-                                padding-bottom: 25px;
-                                background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
-                            }
-                            .logo-section {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                gap: 10px;
-                            }
-                            .logo-img {
-                                width: 100px;
-                                height: 100px;
-                                border-radius: 50%;
-                                box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
-                                border: 5px solid #d4af37;
-                                object-fit: cover;
-                            }
-                            .organization-info {
-                                text-align: center;
-                                flex: 1;
-                            }
-                            .organization-info h2 {
-                                color: #d4af37;
-                                font-size: 14px;
-                                margin: 0;
-                                font-weight: bold;
-                                letter-spacing: 2px;
-                                text-transform: uppercase;
-                            }
-                            .organization-info p {
-                                color: #1a3a7a;
-                                font-size: 11px;
-                                margin: 3px 0;
-                                font-weight: 500;
-                            }
-                            .receipt-number { text-align: right; font-size: 12px; }
-                            .receipt-number strong { font-size: 16px; color: #1a3a7a; }
-                            .receipt-body { margin-bottom: 20px; }
-                            .receipt-field {
-                                display: flex;
-                                justify-content: space-between;
-                                margin-bottom: 15px;
-                                border-bottom: 1px dotted #999;
-                                padding-bottom: 8px;
-                                font-size: 12px;
-                            }
-                            .receipt-field-label { font-weight: bold; color: #1a3a7a; }
-                            .receipt-field-value { color: #333; text-align: right; }
-                            .receipt-main-text {
-                                background: #f9f9f9;
-                                padding: 15px;
-                                border-left: 4px solid #d4af37;
-                                margin: 20px 0;
-                                font-size: 12px;
-                                line-height: 1.8;
-                            }
-                            .receipt-amount {
-                                background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
-                                padding: 25px;
-                                border-radius: 12px;
-                                text-align: center;
-                                margin: 25px 0;
-                                color: #d4af37;
-                                box-shadow: 0 10px 30px rgba(26, 58, 122, 0.3);
-                            }
-                            .receipt-amount-label { font-size: 12px; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px; }
-                            .receipt-amount-value { font-size: 32px; font-weight: bold; color: #d4af37; }
-                            .receipt-footer {
-                                text-align: center;
-                                border-top: 2px solid #1a3a7a;
-                                padding-top: 15px;
-                                margin-top: 30px;
-                                font-size: 10px;
-                                color: #666;
-                            }
-                            .signature-section {
-                                display: flex;
-                                justify-content: center;
-                                gap: 40px;
-                                margin-top: 50px;
-                                text-align: center;
-                                padding-top: 25px;
-                                border-top: 2px dotted #d4af37;
-                            }
-                            .signature-img {
-                                max-width: 120px;
-                                height: auto;
-                                margin-bottom: 15px;
-                            }
-                            .signature-line {
-                                border-top: 2px solid #1a3a7a;
-                                padding-top: 8px;
-                                font-size: 11px;
-                                font-weight: 600;
-                                color: #1a3a7a;
-                                text-transform: uppercase;
-                                letter-spacing: 1px;
-                            }
-                        </style>
-                    </head>
-                    <body onload="window.print(); setTimeout(function(){ window.close(); }, 500);">
-                        ${receiptElement.outerHTML}
-                    </body>
-                    </html>
-                `;
-
-                printWindow.document.write(htmlContent);
-                printWindow.document.close();
-
-                setTimeout(function() {
-                    btnBaixar.disabled = false;
-                    btnBaixar.textContent = '📥 Baixar PDF';
-                }, 2000);
-
-            } catch(error) {
-                console.error('Erro:', error.message);
-                btnBaixar.disabled = false;
-                btnBaixar.textContent = '📥 Baixar PDF';
-                alert('Erro ao gerar PDF:\n\n' + error.message);
-            }
+            window.print();
         }
 
         function limparFormulario() {
-            document.getElementById('numeroRecibo').value = numeroReceboAtual;
-            document.getElementById('dataRecibo').valueAsDate = new Date();
-            document.getElementById('local').value = 'Porto Alegre, RS';
             document.getElementById('nomePagador').value = '';
             document.getElementById('cimPagador').value = '';
             document.getElementById('valor').value = '';
@@ -1286,21 +1258,6 @@
             document.getElementById('preview').innerHTML = '<div class="empty-preview">Preencha os dados e clique em "Gerar Recibo" para visualizar aqui</div>';
             document.getElementById('btnBaixar').style.display = 'none';
         }
-
-        document.addEventListener('click', function(e) {
-            const modal = document.getElementById('modalMes');
-            const modalEditor = document.getElementById('modalEditorRecibo');
-            const modalHistorico = document.getElementById('modalHistorico');
-            if (e.target === modal) fecharModal();
-            if (e.target === modalEditor) fecharEditorRecibo();
-            if (e.target === modalHistorico) fecharHistorico();
-        });
-
-        document.getElementById('descricao').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                gerarRecibo();
-            }
-        });
     </script>
 </body>
 </html>
