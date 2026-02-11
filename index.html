@@ -552,67 +552,76 @@
         }
 
         /* =========================================
-           CORREÇÃO DE IMPRESSÃO - INÍCIO
+           CORREÇÃO DE IMPRESSÃO - ATUALIZADA
            =========================================
         */
         @media print {
-            /* Regra 1: Ocultar tudo que não seja o recibo */
+            /* 1. Configuração da Página: Remove cabeçalhos e rodapés do navegador */
+            @page {
+                size: auto;
+                margin: 0mm;
+            }
+
+            /* 2. Ocultar tudo que não seja o recibo */
             body * {
                 visibility: hidden;
             }
 
-            /* Regra 2: Resetar background do body para branco para economizar tinta onde não tem recibo */
-            body {
+            /* 3. Configurar o Body para centralizar o recibo na folha */
+            body, html {
                 background: white !important;
-                padding: 0 !important;
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden; /* Evita segunda página em branco */
                 margin: 0 !important;
+                padding: 0 !important;
             }
 
-            /* Regra 3: Fazer o preview e seus filhos visíveis */
-            #preview, #preview * {
-                visibility: visible;
-            }
-
-            /* Regra 4: Posicionar o recibo no topo da página */
+            /* 4. Mostrar e Posicionar o Preview */
             #preview {
-                position: absolute;
+                visibility: visible;
+                position: fixed;
                 left: 0;
                 top: 0;
                 width: 100%;
+                height: 100%;
                 margin: 0;
                 padding: 0;
-                border: none !important; /* Remove a borda do container de preview */
+                border: none !important;
                 background: white !important;
-                height: auto;
-                max-height: none !important; /* Remove limite de altura do preview */
-                overflow: visible !important; /* Permite que o conteúdo flua */
+                display: flex;
+                align-items: center; /* Centraliza Verticalmente */
+                justify-content: center; /* Centraliza Horizontalmente */
             }
 
-            /* Regra 5: Ajuste fino do recibo em si */
+            /* 5. Estilo do Recibo na Impressão */
             .receipt {
+                visibility: visible;
                 width: 100%;
-                max-width: 100%;
-                margin: 0;
-                border: 2px solid #d4af37 !important; /* Força a borda do recibo a aparecer */
-                box-shadow: none !important; /* Remove sombra para impressão limpa */
+                max-width: 800px; /* Largura padrão confortável para A4 */
+                margin: 0 auto;
+                border: 2px solid #d4af37 !important;
+                box-shadow: none !important;
+                /* Escala leve para garantir que caiba sem cortes */
+                transform: scale(0.95);
             }
 
-            /* Regra 6: Forçar impressão de cores de fundo e imagens */
+            /* Garante que o conteúdo interno do recibo apareça */
+            #preview * {
+                visibility: visible;
+            }
+
+            /* Forçar cores exatas (Chrome/Edge/Safari) */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                color-adjust: exact !important;
             }
 
-            /* Ocultar elementos específicos que possam vazar */
+            /* Esconde textos de ajuda do preview */
             .empty-preview, .preview-title {
                 display: none !important;
             }
         }
-        /* =========================================
-           CORREÇÃO DE IMPRESSÃO - FIM
-           ========================================= */
-
     </style>
 </head>
 <body>
