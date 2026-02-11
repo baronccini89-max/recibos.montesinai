@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Recibos - Monte Sinai</title>
     <style>
+        /* ================= ESTILOS GERAIS (TELA) ================= */
         * {
             margin: 0;
             padding: 0;
@@ -174,15 +175,14 @@
             font-size: 16px;
         }
 
-        /* Estilo da caixa de visualização na TELA (com scroll) */
         #preview {
             background: #f9f9f9;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
             padding: 20px;
             min-height: 400px;
-            overflow-y: auto; /* Permite scroll na tela */
-            max-height: 600px; /* Limita altura na tela */
+            overflow-y: auto;
+            max-height: 600px;
             font-size: 13px;
             line-height: 1.6;
         }
@@ -553,78 +553,81 @@
         }
 
         /* =========================================
-           CORREÇÃO DE IMPRESSÃO DEFINITIVA
+           CORREÇÃO DEFINITIVA DE IMPRESSÃO
            =========================================
         */
         @media print {
-            /* 1. Define o papel A4 sem margens automáticas do navegador */
-            @page {
-                size: A4;
-                margin: 0;
+            /* 1. RESET TOTAL DO CORPO E HTML */
+            html, body {
+                background: white !important; /* Remove o fundo azul/dourado */
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important; /* Permite que o conteúdo flua sem scroll */
+                display: block !important; /* Remove comportamento Flexbox que centraliza */
             }
 
-            /* 2. Esconde tudo na página */
-            body * {
-                visibility: hidden;
+            /* 2. RESET DO CONTAINER PRINCIPAL */
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: white !important;
+                display: block !important;
             }
 
-            /* 3. Prepara o corpo para receber o recibo */
-            body, html {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                background-color: white !important; /* Remove o gradiente azul */
+            /* 3. REMOÇÃO DE ELEMENTOS QUE CAUSAM PÁGINA EXTRA */
+            /* "Desliga" o formulário, o título e botões da renderização */
+            .form-section, 
+            h1, 
+            .preview-title, 
+            .empty-preview,
+            .buttons {
+                display: none !important;
             }
 
-            /* 4. Torna visível o container do recibo e seus filhos */
-            #preview, #preview * {
-                visibility: visible;
-            }
-
-            /* 5. CONFIGURAÇÃO CRÍTICA DO PREVIEW
-               - position: absolute para sair do fluxo
-               - overflow: visible para MOSTRAR TUDO (não cortar o scroll)
-               - max-height: none para ignorar o limite da tela
-            */
+            /* 4. CONFIGURAÇÃO DA CAIXA DE PREVIEW */
             #preview {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
+                display: block !important;
+                position: relative !important; /* Volta ao fluxo normal */
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 border: none !important;
                 background: white !important;
                 
-                /* ESTAS TRÊS LINHAS CORRIGEM O CORTE */
+                /* CRUCIAL: Remove scrollbars e limites de altura */
                 overflow: visible !important;
                 max-height: none !important;
                 height: auto !important;
-                
-                display: flex;
-                justify-content: center;
-                align-items: flex-start; /* Alinha no topo, mas permite crescer */
-                padding-top: 20px; /* Margem superior segura */
             }
 
-            /* 6. Estilo do Recibo no Papel */
+            /* 5. CONFIGURAÇÃO DO RECIBO */
             .receipt {
-                width: 100%;
-                max-width: 750px; /* Largura segura para A4 */
-                margin: 0 auto;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
                 border: 2px solid #d4af37 !important;
                 box-shadow: none !important;
+                
+                /* Garante que não quebre página no meio */
+                page-break-inside: avoid;
             }
 
-            /* Esconde textos auxiliares */
-            .empty-preview, .preview-title {
-                display: none !important;
-            }
-            
-            /* Garante cores exatas */
+            /* 6. GARANTIA DE CORES */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+            }
+
+            /* 7. DEFINIÇÃO DA PÁGINA A4 */
+            @page {
+                size: A4;
+                margin: 10mm; /* Margem de segurança para impressora */
             }
         }
     </style>
