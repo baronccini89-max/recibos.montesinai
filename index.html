@@ -579,8 +579,13 @@
     <script>
         document.getElementById('dataRecibo').valueAsDate = new Date();
 
-        const logoURL = 'https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/20d785f1-ec9c-4909-a2b7-c92d78dca259';
-        const assinaturaTesoureiro = 'https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/3ba79747-82a7-4af3-a4d5-f48ed5be312a';
+        /* =========================================================
+           AQUI ESTÁ A CORREÇÃO:
+           Estamos dizendo para o site buscar os arquivos "logo.png" 
+           e "assinatura.png" na mesma pasta onde este arquivo HTML está.
+           ========================================================= */
+        const logoURL = './logo.png'; 
+        const assinaturaTesoureiro = './assinatura.png';
 
         const cadastroPagadores = [
             { nome: "Adriano Locateli Da Rosa", cim: "27529" },
