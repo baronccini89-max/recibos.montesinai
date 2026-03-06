@@ -948,8 +948,8 @@
             }
         }
 
-        async function gerarRecibo() {
-            // CORREÇÃO: Capturamos o valor ANTES de incrementar
+       async function gerarRecibo() {
+            // Capturamos o valor ANTES de incrementar
             const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
             
             // Salvamos na variável global para usar no download
@@ -985,6 +985,26 @@
             const salvou = await salvarReciboFirebase(dadosRecibo);
             
             if (salvou) {
+                // --- INÍCIO DA INTEGRAÇÃO COM GOOGLE SHEETS ---
+                try {
+                    // Aqui está a sua URL configurada!
+                    const urlPlanilha = 'https://script.google.com/macros/s/AKfycbySgVQOEiVkLaWj1vvzPys8W8IhJKHdipTkizML5eokm5WcQPaiYOVTm6tTThz0wLxT/exec'; 
+                    
+                    await fetch(urlPlanilha, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                        body: JSON.stringify({
+                            nome: nomePagador,
+                            valor: valor,
+                            meses: mesesSelecionados
+                        })
+                    });
+                    console.log('✅ Dados enviados para a planilha!');
+                } catch (erroPlanilha) {
+                    console.error('❌ Erro ao enviar para planilha:', erroPlanilha);
+                }
+                // --- FIM DA INTEGRAÇÃO COM GOOGLE SHEETS ---
+
                 // Mostrar mensagem de sucesso
                 const msg = document.getElementById('successMessage');
                 msg.style.display = 'block';
