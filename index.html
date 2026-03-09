@@ -953,14 +953,14 @@
                 const qtdMeses = mesesSelecionados.length;
                 if (qtdMeses > 0) {
                     const valorTotal = qtdMeses * 90;
-                    campoValor.value = valorTotal.toFixed(2); // Preenche com duas casas decimais (ex: 90.00, 180.00)
+                    campoValor.value = valorTotal.toFixed(2); 
                 } else {
-                    campoValor.value = ''; // Limpa o campo se remover todos os meses
+                    campoValor.value = ''; 
                 }
             }
         }
 
-async function gerarRecibo() {
+        async function gerarRecibo() {
             const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
             numeroReciboGerado = numeroRecibo;
 
@@ -1069,7 +1069,7 @@ async function gerarRecibo() {
                 document.getElementById('preview').innerHTML = reciboHTML;
                 document.getElementById('btnBaixar').style.display = 'block';
 
-                // --- 2. RECIBO PARA O GOOGLE DRIVE ---
+                // --- 2. RECIBO CLEAN PARA O DRIVE ---
                 const htmlParaDrive = `
                 <html>
                     <body style="font-family: Arial, sans-serif; padding: 40px; color: #333;">
@@ -1099,10 +1099,8 @@ async function gerarRecibo() {
                 </html>
                 `;
 
-vaScript
                 // --- 3. ENVIANDO PARA A PLANILHA E DRIVE ---
                 try {
-                    // COLE SUA URL NOVA AQUI DENTRO DAS ASPAS:
                     const urlPlanilha = 'https://script.google.com/macros/s/AKfycbw3JRriAKixqpMAAHuD-tu3DngOSjuyYtD8ORy4NvN9_AOnkEsdCng-pfQw3v9Yui1K/exec'; 
                     
                     const resposta = await fetch(urlPlanilha, {
@@ -1113,7 +1111,7 @@ vaScript
                             valor: valor,
                             meses: mesesSelecionados,
                             numero: numeroRecibo,
-                            htmlDrive: htmlParaDrive // Envia o texto para virar PDF
+                            htmlDrive: htmlParaDrive
                         })
                     });
                     
@@ -1123,6 +1121,17 @@ vaScript
                 } catch (erroPlanilha) {
                     console.error('❌ Erro de conexão:', erroPlanilha);
                 }
+
+                const msg = document.getElementById('successMessage');
+                if (msg) {
+                    msg.style.display = 'block';
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                }
+
+                if(typeof incrementarNumeroRecibo === 'function') incrementarNumeroRecibo();
+                if(typeof carregarUltimoRecibo === 'function') await carregarUltimoRecibo();
+            }
+        }
 
         function converterValorExtenso(valor) {
             // Implementação simplificada - você pode usar uma biblioteca mais robusta
