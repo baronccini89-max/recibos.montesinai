@@ -919,7 +919,7 @@
             }
         }
 
-        function renderizarMeses() {
+      function renderizarMeses() {
             const container = document.getElementById('mesosContainer');
             container.innerHTML = '';
 
@@ -945,6 +945,18 @@
                     `;
                     container.appendChild(div);
                 });
+            }
+
+            // --- CÁLCULO AUTOMÁTICO DO VALOR ---
+            const campoValor = document.getElementById('valor');
+            if (campoValor) {
+                const qtdMeses = mesesSelecionados.length;
+                if (qtdMeses > 0) {
+                    const valorTotal = qtdMeses * 90;
+                    campoValor.value = valorTotal.toFixed(2); // Preenche com duas casas decimais (ex: 90.00, 180.00)
+                } else {
+                    campoValor.value = ''; // Limpa o campo se remover todos os meses
+                }
             }
         }
 
