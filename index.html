@@ -1099,11 +1099,13 @@ async function gerarRecibo() {
                 </html>
                 `;
 
+vaScript
                 // --- 3. ENVIANDO PARA A PLANILHA E DRIVE ---
                 try {
+                    // COLE SUA URL NOVA AQUI DENTRO DAS ASPAS:
                     const urlPlanilha = 'https://script.google.com/macros/s/AKfycbw3JRriAKixqpMAAHuD-tu3DngOSjuyYtD8ORy4NvN9_AOnkEsdCng-pfQw3v9Yui1K/exec'; 
                     
-                    await fetch(urlPlanilha, {
+                    const resposta = await fetch(urlPlanilha, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                         body: JSON.stringify({
@@ -1114,20 +1116,13 @@ async function gerarRecibo() {
                             htmlDrive: htmlParaDrive // Envia o texto para virar PDF
                         })
                     });
+                    
+                    const textoResposta = await resposta.text();
+                    console.log('🗣️ O Google respondeu:', textoResposta);
+
                 } catch (erroPlanilha) {
-                    console.error('Erro:', erroPlanilha);
+                    console.error('❌ Erro de conexão:', erroPlanilha);
                 }
-
-                const msg = document.getElementById('successMessage');
-                if (msg) {
-                    msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                }
-
-                if(typeof incrementarNumeroRecibo === 'function') incrementarNumeroRecibo();
-                if(typeof carregarUltimoRecibo === 'function') await carregarUltimoRecibo();
-            }
-        }
 
         function converterValorExtenso(valor) {
             // Implementação simplificada - você pode usar uma biblioteca mais robusta
