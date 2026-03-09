@@ -1004,7 +1004,7 @@
 
                 const nomePagadorComCim = cimPagador ? `${nomePagador} - CIM ${cimPagador}` : nomePagador;
 
-                // --- 1. RECIBO PARA A TELA (Visual Original) ---
+                // --- 1. RECIBO PARA A TELA ---
                 const reciboHTML = `
                     <div class="receipt">
                         <div class="receipt-header">
@@ -1023,7 +1023,6 @@
                                 <strong>${numeroRecibo}</strong>
                             </div>
                         </div>
-
                         <div class="receipt-body">
                             <div class="receipt-field">
                                 <span class="receipt-field-label">Data:</span>
@@ -1037,14 +1036,7 @@
                                 <span class="receipt-field-label">Local:</span>
                                 <span class="receipt-field-value">${local}</span>
                             </div>
-                            
-                            ${descricao ? `
-                            <div class="receipt-field" style="margin-top: 8px;">
-                                <span class="receipt-field-label">Motivo/Destinação:</span>
-                                <span class="receipt-field-value">${descricao}</span>
-                            </div>
-                            ` : ''}
-
+                            ${descricao ? `<div class="receipt-field" style="margin-top: 8px;"><span class="receipt-field-label">Motivo/Destinação:</span><span class="receipt-field-value">${descricao}</span></div>` : ''}
                             <div class="receipt-main-text">
                                 <strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).
                             </div>
@@ -1053,15 +1045,11 @@
                                 <div class="receipt-amount-value">R$ ${valorFormatado}</div>
                             </div>
                         </div>
-                        
                         <div class="signature-section">
                             <div style="text-align: center;">
                                 <img src="${typeof assinaturaTesoureiro !== 'undefined' ? assinaturaTesoureiro : ''}" alt="Assinatura Tesoureiro" class="signature-img">
                                 <div class="signature-line">Tesoureiro gestão 2025/2026</div>
                             </div>
-                        </div>
-                        <div class="receipt-footer">
-                            Documento gerado eletronicamente em ${new Date().toLocaleDateString('pt-BR')}
                         </div>
                     </div>
                 `;
@@ -1069,70 +1057,37 @@
                 document.getElementById('preview').innerHTML = reciboHTML;
                 document.getElementById('btnBaixar').style.display = 'block';
 
-                // --- 2. RECIBO CLEAN PARA O DRIVE ---
-                const htmlParaDrive = `
-                <html>
-                    <body style="font-family: Arial, sans-serif; padding: 40px; color: #333;">
-                        <div style="text-align: center; border-bottom: 2px solid #ccc; padding-bottom: 20px; margin-bottom: 30px;">
-                            <h2 style="margin: 0; color: #1a365d;">TESOURARIA - RECIBO</h2>
-                            <p style="margin: 5px 0;">Loja Simbólica Monte Sinai nº 371</p>
-                            <p style="margin: 5px 0;">Nº ${numeroRecibo}</p>
-                        </div>
-                        <div style="font-size: 16px; line-height: 1.6;">
-                            <p><strong>Data:</strong> ${dataFormatada}</p>
-                            <p><strong>Recebido de:</strong> ${nomePagadorComCim}</p>
-                            <p><strong>Local:</strong> ${local}</p>
-                            ${descricao ? `<p><strong>Motivo/Destinação:</strong> ${descricao}</p>` : ''}
-                            
-                            <p style="margin-top: 30px; font-size: 18px; text-align: justify;">
-                                <strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).
-                            </p>
-                        </div>
-                        <div style="margin-top: 80px; text-align: center;">
-                            <p>____________________________________________________</p>
-                            <p>Tesoureiro gestão 2025/2026</p>
-                        </div>
-                        <div style="margin-top: 40px; font-size: 12px; color: #777; text-align: center;">
-                            Documento gerado eletronicamente em ${new Date().toLocaleDateString('pt-BR')}
-                        </div>
-                    </body>
-                </html>
-                `;
+                // --- 2. PREPARAR DADOS PARA O DRIVE ---
+                // Transforma "Março de 2026" em "março 2026" para o nome do arquivo
+                const mesesParaArquivo = mesesSelecionados.map(m => m.text.replace(' de ', ' ').toLowerCase()).join(', ');
 
-                // --- 3. ENVIANDO PARA A PLANILHA E DRIVE ---
                 try {
                     const urlPlanilha = 'https://script.google.com/macros/s/AKfycbw3JRriAKixqpMAAHuD-tu3DngOSjuyYtD8ORy4NvN9_AOnkEsdCng-pfQw3v9Yui1K/exec'; 
-                    
-                    const resposta = await fetch(urlPlanilha, {
+                    await fetch(urlPlanilha, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                         body: JSON.stringify({
                             nome: nomePagador,
-                            valor: valor,
-                            meses: mesesSelecionados,
+                            cim: cimPagador,
                             numero: numeroRecibo,
-                            htmlDrive: htmlParaDrive
+                            valor: valor,
+                            mesesRaw: mesesSelecionados,
+                            mesesText: mesesParaArquivo,
+                            motivo: descricao,
+                            htmlDrive: `<html><body style="font-family:Arial;padding:40px;"><h2>RECIBO Nº ${numeroRecibo}</h2><p>Data: ${dataFormatada}</p><p>Nome: ${nomePagadorComCim}</p><p>Valor: R$ ${valorFormatado}</p><p>Referente a: ${mesosTexto || descricao}</p></body></html>`
                         })
                     });
-                    
-                    const textoResposta = await resposta.text();
-                    console.log('🗣️ O Google respondeu:', textoResposta);
-
-                } catch (erroPlanilha) {
-                    console.error('❌ Erro de conexão:', erroPlanilha);
-                }
+                } catch (e) { console.error('Erro ao enviar para o Google:', e); }
 
                 const msg = document.getElementById('successMessage');
-                if (msg) {
-                    msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                }
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
 
                 if(typeof incrementarNumeroRecibo === 'function') incrementarNumeroRecibo();
                 if(typeof carregarUltimoRecibo === 'function') await carregarUltimoRecibo();
             }
         }
-
+        
         function converterValorExtenso(valor) {
             // Implementação simplificada - você pode usar uma biblioteca mais robusta
             const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
