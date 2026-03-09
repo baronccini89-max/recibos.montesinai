@@ -972,6 +972,7 @@
             const nomePagador = document.getElementById('nomePagador').value || '';
             const cimPagador = document.getElementById('cimPagador').value || '';
             const valor = document.getElementById('valor').value || '0.00';
+            const descricao = document.getElementById('descricao').value.trim();
 
             if (!nomePagador) {
                 alert('Por favor, preencha o nome de quem pagou');
@@ -1070,10 +1071,17 @@
                             <span class="receipt-field-value">${nomePagadorComCim}</span>
                         </div>
 
-                        <div class="receipt-field">
+                      <div class="receipt-field">
                             <span class="receipt-field-label">Local:</span>
                             <span class="receipt-field-value">${local}</span>
                         </div>
+
+                        ${descricao ? `
+                        <div class="receipt-field" style="margin-top: 8px;">
+                            <span class="receipt-field-label">Motivo/Destinação:</span>
+                            <span class="receipt-field-value">${descricao}</span>
+                        </div>
+                        ` : ''}
 
                         <div class="receipt-main-text">
                             <strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).
