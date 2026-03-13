@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Remove flash de toque no mobile */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -30,12 +30,11 @@
             max-width: 1400px;
             width: 100%;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Desktop: 2 colunas */
+            grid-template-columns: 1fr 1fr;
             gap: 40px;
             padding: 50px;
         }
 
-        /* Títulos e Textos */
         h1 {
             grid-column: 1 / -1;
             color: #1a3a7a;
@@ -69,7 +68,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Campos de Entrada */
         input, textarea, select {
             padding: 14px 16px;
             border: 2px solid #e8e8e8;
@@ -99,7 +97,6 @@
             gap: 15px;
         }
 
-        /* Botões */
         .buttons {
             display: flex;
             gap: 12px;
@@ -140,14 +137,13 @@
             color: white;
         }
 
-        /* Área de Preview (Visualização na Tela) */
         .preview-section {
             border-left: 2px solid #e0e0e0;
             padding-left: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            min-width: 0; /* Evita estouro no grid */
+            min-width: 0;
         }
 
         .preview-title {
@@ -162,13 +158,12 @@
             border-radius: 6px;
             padding: 20px;
             min-height: 400px;
-            overflow-y: auto; /* Scroll vertical se necessário */
+            overflow-y: auto;
             max-height: 600px;
             font-size: 13px;
             line-height: 1.6;
         }
 
-        /* Estilo Visual do Recibo */
         .receipt {
             background: white;
             padding: 35px;
@@ -176,7 +171,6 @@
             border-radius: 12px;
             font-family: 'Times New Roman', serif;
             box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
-            /* Garante largura mínima para manter layout bonito na tela */
             min-width: 600px; 
         }
 
@@ -198,11 +192,11 @@
         }
 
       .logo-img {
-            width: 120px; /* Largura ideal para o recibo */
-            height: auto; /* Mantém a proporção correta sem esticar */
-            object-fit: contain; /* Garante que a imagem não seja cortada */
+            width: 120px;
+            height: auto;
+            object-fit: contain;
             display: block;
-            margin: 0 auto; /* Centraliza a imagem direitinho */
+            margin: 0 auto;
         }
 
         .organization-info { text-align: center; flex: 1; }
@@ -333,17 +327,16 @@
 
         /* ==================================================
            CONFIGURAÇÃO ESPECÍFICA PARA MOBILE (TELA)
-           (Ajusta o layout para caber no celular)
            ================================================== */
         @media screen and (max-width: 768px) {
             body {
                 padding: 10px;
-                display: block; /* Remove flex center */
+                display: block;
             }
 
             .container {
                 display: flex;
-                flex-direction: column; /* Coloca formulário e preview um em cima do outro */
+                flex-direction: column;
                 gap: 25px;
                 padding: 25px 20px;
                 margin-bottom: 20px;
@@ -360,7 +353,6 @@
                 overflow-x: hidden;
             }
 
-            /* Permite scroll horizontal no recibo para não quebrar o layout */
             #preview {
                 padding: 15px;
                 min-height: 300px;
@@ -368,27 +360,22 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            .buttons { flex-direction: column; } /* Botões empilhados */
-            button { padding: 18px; font-size: 14px; } /* Botões maiores para toque */
-            .row { grid-template-columns: 1fr; gap: 15px; } /* Inputs em uma coluna */
+            .buttons { flex-direction: column; }
+            button { padding: 18px; font-size: 14px; }
+            .row { grid-template-columns: 1fr; gap: 15px; }
         }
 
         /* =========================================
            CONFIGURAÇÃO DE IMPRESSÃO (PDF)
-           (Funciona igual em PC e Mobile)
-           =========================================
-        */
+           ========================================= */
         @media print {
             @page {
                 size: A4;
                 margin: 10mm;
             }
-
-            /* Oculta o desnecessário */
             body * { visibility: hidden; }
             .form-section, h1, .preview-title, .empty-preview, .buttons { display: none !important; }
 
-            /* Reseta o corpo da página */
             html, body, .container {
                 background: white !important;
                 width: 100% !important;
@@ -401,7 +388,6 @@
                 box-shadow: none !important;
             }
 
-            /* Configura o Preview para impressão */
             #preview {
                 display: block !important;
                 position: relative !important;
@@ -415,22 +401,18 @@
                 height: auto !important;
             }
 
-            /* Configura o Recibo no papel */
             .receipt {
                 visibility: visible;
                 width: 100% !important;
                 max-width: 100% !important;
-                min-width: 0 !important; /* Reseta a largura mínima do mobile */
+                min-width: 0 !important;
                 margin: 0 !important;
                 border: 2px solid #d4af37 !important;
                 box-shadow: none !important;
                 page-break-inside: avoid;
             }
             
-            /* Garante visibilidade dos filhos */
             .receipt * { visibility: visible; }
-
-            /* Garante cores */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -592,28 +574,19 @@
             appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
         };
 
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Disponibilizar globalmente
         window.db = db;
         window.firestore = { collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc };
 
         console.log('✅ Firebase inicializado com sucesso!');
-        
-        // Carregar último recibo ao iniciar
         carregarUltimoRecibo();
     </script>
 
     <script>
         document.getElementById('dataRecibo').valueAsDate = new Date();
 
-        /* =========================================================
-           AQUI ESTÁ A CORREÇÃO:
-           Estamos dizendo para o site buscar os arquivos "logo.png" 
-           e "assinatura.png" na mesma pasta onde este arquivo HTML está.
-           ========================================================= */
         const logoURL = './logo.png'; 
         const assinaturaTesoureiro = './assinatura.png';
 
@@ -666,7 +639,6 @@
             { nome: "Victor Elencave", cim: "22007" }
         ];
 
-        // Preencher o datalist de nomes
         const datalistPagadores = document.getElementById('listaPagadores');
         cadastroPagadores.forEach(p => {
             const option = document.createElement('option');
@@ -675,7 +647,6 @@
             datalistPagadores.appendChild(option);
         });
 
-        // Atualizar CIM ao escolher o nome
         const inputNomePagador = document.getElementById('nomePagador');
         const inputCimPagador = document.getElementById('cimPagador');
 
@@ -691,19 +662,12 @@
 
         let mesesSelecionados = [];
         let numeroReceboAtual = '2026-02';
-        
-        // VARIÁVEL PARA GUARDAR O NÚMERO DO RECIBO ATUALMENTE GERADO
         let numeroReciboGerado = '';
-
-        // ========== FUNÇÕES FIREBASE ==========
 
         function mostrarLoading(mostrar) {
             const loading = document.getElementById('loadingIndicator');
-            if (mostrar) {
-                loading.classList.add('show');
-            } else {
-                loading.classList.remove('show');
-            }
+            if (mostrar) loading.classList.add('show');
+            else loading.classList.remove('show');
         }
 
         async function carregarUltimoRecibo() {
@@ -721,8 +685,6 @@
                     const ultimoRecibo = querySnapshot.docs[0].data();
                     const infoDiv = document.getElementById('ultimoReciboInfo');
                     infoDiv.innerHTML = `📋 Último recibo: #${ultimoRecibo.numero} - ${ultimoRecibo.nome} - ${new Date(ultimoRecibo.timestamp).toLocaleDateString('pt-BR')}`;
-                    
-                    // Auto-incrementar o número
                     numeroReceboAtual = incrementarNumero(ultimoRecibo.numero);
                     document.getElementById('numeroRecibo').value = numeroReceboAtual;
                 } else {
@@ -751,13 +713,8 @@
             try {
                 const docRef = await window.firestore.addDoc(
                     window.firestore.collection(window.db, 'recibos'),
-                    {
-                        ...dadosRecibo,
-                        timestamp: new Date().toISOString(),
-                        timestampNumerico: Date.now()
-                    }
+                    { ...dadosRecibo, timestamp: new Date().toISOString(), timestampNumerico: Date.now() }
                 );
-                console.log('✅ Recibo salvo no Firebase:', docRef.id);
                 return true;
             } catch (error) {
                 console.error('❌ Erro ao salvar recibo:', error);
@@ -769,21 +726,10 @@
         async function carregarHistoricoFirebase() {
             try {
                 mostrarLoading(true);
-                const q = window.firestore.query(
-                    window.firestore.collection(window.db, 'recibos'),
-                    window.firestore.orderBy('timestamp', 'desc')
-                );
-                
+                const q = window.firestore.query(window.firestore.collection(window.db, 'recibos'), window.firestore.orderBy('timestamp', 'desc'));
                 const querySnapshot = await window.firestore.getDocs(q);
                 const historico = [];
-                
-                querySnapshot.forEach((doc) => {
-                    historico.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
+                querySnapshot.forEach((doc) => { historico.push({ id: doc.id, ...doc.data() }); });
                 mostrarLoading(false);
                 return historico;
             } catch (error) {
@@ -794,25 +740,12 @@
         }
 
         async function limparHistoricoFirebase() {
-            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODOS os recibos do banco de dados permanentemente. Tem certeza?')) {
-                return;
-            }
-            
+            if (!confirm('⚠️ ATENÇÃO! Isso irá apagar TODOS os recibos do banco de dados permanentemente. Tem certeza?')) return;
             try {
                 mostrarLoading(true);
-                const querySnapshot = await window.firestore.getDocs(
-                    window.firestore.collection(window.db, 'recibos')
-                );
-                
+                const querySnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'recibos'));
                 const deletePromises = [];
-                querySnapshot.forEach((documento) => {
-                    deletePromises.push(
-                        window.firestore.deleteDoc(
-                            window.firestore.doc(window.db, 'recibos', documento.id)
-                        )
-                    );
-                });
-                
+                querySnapshot.forEach((documento) => { deletePromises.push(window.firestore.deleteDoc(window.firestore.doc(window.db, 'recibos', documento.id))); });
                 await Promise.all(deletePromises);
                 alert('✅ Histórico limpo com sucesso!');
                 await renderizarHistorico();
@@ -825,22 +758,16 @@
             }
         }
 
-        // ========== FUNÇÕES DE HISTÓRICO ==========
-
         async function abrirHistorico() {
             document.getElementById('modalHistorico').classList.add('active');
             await renderizarHistorico();
         }
 
-        function fecharHistorico() {
-            document.getElementById('modalHistorico').classList.remove('active');
-        }
+        function fecharHistorico() { document.getElementById('modalHistorico').classList.remove('active'); }
 
         async function renderizarHistorico() {
             const historico = await carregarHistoricoFirebase();
             const ultimos10 = historico.slice(0, 10);
-
-            // Aba Últimos 10
             const divUltimos = document.getElementById('historico-ultimos');
             if (ultimos10.length === 0) {
                 divUltimos.innerHTML = '<div class="historico-vazio">Nenhum recibo gerado ainda</div>';
@@ -851,11 +778,8 @@
                         <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
                         <div class="historico-detalhes">💰 R$ ${r.valor}</div>
                         <div class="historico-data">📅 ${new Date(r.timestamp).toLocaleDateString('pt-BR')} às ${new Date(r.timestamp).toLocaleTimeString('pt-BR')}</div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             }
-
-            // Aba Todos
             const divTodos = document.getElementById('historico-todos');
             if (historico.length === 0) {
                 divTodos.innerHTML = '<div class="historico-vazio">Nenhum recibo gerado ainda</div>';
@@ -866,8 +790,7 @@
                         <div class="historico-detalhes">👤 ${r.nome} (CIM ${r.cim})</div>
                         <div class="historico-detalhes">💰 R$ ${r.valor}</div>
                         <div class="historico-data">📅 ${new Date(r.timestamp).toLocaleDateString('pt-BR')} às ${new Date(r.timestamp).toLocaleTimeString('pt-BR')}</div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             }
         }
 
@@ -877,9 +800,7 @@
             fecharHistorico();
         }
 
-        async function limparHistorico() {
-            await limparHistoricoFirebase();
-        }
+        async function limparHistorico() { await limparHistoricoFirebase(); }
 
         function mudarAbaHistorico(aba) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -893,16 +814,11 @@
             document.getElementById('modalEditorRecibo').classList.add('active');
         }
 
-        function fecharEditorRecibo() {
-            document.getElementById('modalEditorRecibo').classList.remove('active');
-        }
+        function fecharEditorRecibo() { document.getElementById('modalEditorRecibo').classList.remove('active'); }
 
         function confirmarNumeroRecibo() {
             const novoNumero = document.getElementById('inputNumeroRecibo').value.trim();
-            if (!novoNumero) {
-                alert('Por favor, preencha o número do recibo');
-                return;
-            }
+            if (!novoNumero) { alert('Por favor, preencha o número do recibo'); return; }
             numeroReceboAtual = novoNumero;
             document.getElementById('numeroRecibo').value = novoNumero;
             fecharEditorRecibo();
@@ -913,6 +829,7 @@
             document.getElementById('numeroRecibo').value = numeroReceboAtual;
         }
 
+        // ================= FUNÇÕES DO GRID DE MESES =================
         const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         function adicionarMes() {
@@ -965,9 +882,7 @@
             const checkboxes = document.querySelectorAll('.mes-checkbox-input:not(:disabled)');
             const todosMarcados = Array.from(checkboxes).every(chk => chk.checked);
             
-            checkboxes.forEach(chk => {
-                chk.checked = !todosMarcados;
-            });
+            checkboxes.forEach(chk => { chk.checked = !todosMarcados; });
         }
 
         function confirmarMesesMultiplos() {
@@ -983,7 +898,6 @@
                 const mesIndex = parseInt(chk.value);
                 const mesNome = nomesMeses[mesIndex];
                 const mesText = `${mesNome} de ${ano}`;
-                
                 mesesSelecionados.push({ mes: mesIndex, ano: ano, text: mesText });
             });
 
@@ -1006,7 +920,7 @@
             }
         }
 
-      function renderizarMeses() {
+        function renderizarMeses() {
             const container = document.getElementById('mesosContainer');
             container.innerHTML = '';
 
@@ -1034,7 +948,7 @@
                 });
             }
 
-            // --- CÁLCULO AUTOMÁTICO DO VALOR ---
+            // --- CÁLCULO AUTOMÁTICO DO VALOR (R$90 por mês) ---
             const campoValor = document.getElementById('valor');
             if (campoValor) {
                 const qtdMeses = mesesSelecionados.length;
@@ -1050,7 +964,6 @@
         async function gerarRecibo() {
             const numeroRecibo = document.getElementById('numeroRecibo').value || '2026-02';
             numeroReciboGerado = numeroRecibo;
-
             const dataRecibo = document.getElementById('dataRecibo').value || new Date().toISOString().split('T')[0];
             const local = document.getElementById('local').value || 'Porto Alegre, RS';
             const nomePagador = document.getElementById('nomePagador').value || '';
@@ -1058,22 +971,11 @@
             const valor = document.getElementById('valor').value || '0.00';
             const descricao = document.getElementById('descricao') ? document.getElementById('descricao').value.trim() : '';
 
-            if (!nomePagador) {
-                alert('Por favor, preencha o nome de quem pagou');
-                return;
-            }
-            if (!valor || valor === '0.00') {
-                alert('Por favor, preencha o valor');
-                return;
-            }
+            if (!nomePagador) { alert('Por favor, preencha o nome de quem pagou'); return; }
+            if (!valor || valor === '0.00') { alert('Por favor, preencha o valor'); return; }
 
             const dadosRecibo = {
-                numero: numeroRecibo,
-                nome: nomePagador,
-                cim: cimPagador,
-                valor: valor,
-                data: dataRecibo,
-                local: local,
+                numero: numeroRecibo, nome: nomePagador, cim: cimPagador, valor: valor, data: dataRecibo, local: local,
                 meses: mesesSelecionados.map(m => m.text).join(' e ')
             };
 
@@ -1083,21 +985,13 @@
                 const dataFormatada = new Date(dataRecibo + 'T00:00:00').toLocaleDateString('pt-BR');
                 const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const valorExtenso = converterValorExtenso(parseFloat(valor));
-
-                let mesosTexto = '';
-                if (mesesSelecionados.length > 0) {
-                    mesosTexto = mesesSelecionados.map(m => m.text).join(' e ');
-                }
-
+                let mesosTexto = mesesSelecionados.length > 0 ? mesesSelecionados.map(m => m.text).join(' e ') : '';
                 const nomePagadorComCim = cimPagador ? `${nomePagador} - CIM ${cimPagador}` : nomePagador;
 
-                // --- 1. RECIBO PARA A TELA ---
                 const reciboHTML = `
                     <div class="receipt">
                         <div class="receipt-header">
-                            <div class="logo-section">
-                                <img src="${typeof logoURL !== 'undefined' ? logoURL : ''}" alt="Logo Monte Sinai" class="logo-img">
-                            </div>
+                            <div class="logo-section"><img src="${typeof logoURL !== 'undefined' ? logoURL : ''}" alt="Logo Monte Sinai" class="logo-img"></div>
                             <div class="organization-info">
                                 <h2>TESOURARIA - RECIBO</h2>
                                 <p>Augusta Respeitável Benfeitora e Excelsa</p>
@@ -1105,47 +999,24 @@
                                 <p>Rito Adonhiramita – Centro Templário</p>
                                 <p>Porto Alegre / RS</p>
                             </div>
-                            <div class="receipt-number">
-                                <div>Nº</div>
-                                <strong>${numeroRecibo}</strong>
-                            </div>
+                            <div class="receipt-number"><div>Nº</div><strong>${numeroRecibo}</strong></div>
                         </div>
                         <div class="receipt-body">
-                            <div class="receipt-field">
-                                <span class="receipt-field-label">Data:</span>
-                                <span class="receipt-field-value">${dataFormatada}</span>
-                            </div>
-                            <div class="receipt-field">
-                                <span class="receipt-field-label">Recebido de:</span>
-                                <span class="receipt-field-value">${nomePagadorComCim}</span>
-                            </div>
-                            <div class="receipt-field">
-                                <span class="receipt-field-label">Local:</span>
-                                <span class="receipt-field-value">${local}</span>
-                            </div>
+                            <div class="receipt-field"><span class="receipt-field-label">Data:</span><span class="receipt-field-value">${dataFormatada}</span></div>
+                            <div class="receipt-field"><span class="receipt-field-label">Recebido de:</span><span class="receipt-field-value">${nomePagadorComCim}</span></div>
+                            <div class="receipt-field"><span class="receipt-field-label">Local:</span><span class="receipt-field-value">${local}</span></div>
                             ${descricao ? `<div class="receipt-field" style="margin-top: 8px;"><span class="receipt-field-label">Motivo/Destinação:</span><span class="receipt-field-value">${descricao}</span></div>` : ''}
-                            <div class="receipt-main-text">
-                                <strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).
-                            </div>
-                            <div class="receipt-amount">
-                                <div class="receipt-amount-label">VALOR RECEBIDO</div>
-                                <div class="receipt-amount-value">R$ ${valorFormatado}</div>
-                            </div>
+                            <div class="receipt-main-text"><strong>RECEBEMOS</strong> com agradecimento a importância de doação correspondente ${mesosTexto ? `a <strong>${mesosTexto}</strong>` : ''} no valor de <strong>R$ ${valorFormatado}</strong> (${valorExtenso}).</div>
+                            <div class="receipt-amount"><div class="receipt-amount-label">VALOR RECEBIDO</div><div class="receipt-amount-value">R$ ${valorFormatado}</div></div>
                         </div>
                         <div class="signature-section">
-                            <div style="text-align: center;">
-                                <img src="${typeof assinaturaTesoureiro !== 'undefined' ? assinaturaTesoureiro : ''}" alt="Assinatura Tesoureiro" class="signature-img">
-                                <div class="signature-line">Tesoureiro gestão 2025/2026</div>
-                            </div>
+                            <div style="text-align: center;"><img src="${typeof assinaturaTesoureiro !== 'undefined' ? assinaturaTesoureiro : ''}" alt="Assinatura Tesoureiro" class="signature-img"><div class="signature-line">Tesoureiro gestão 2025/2026</div></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
 
                 document.getElementById('preview').innerHTML = reciboHTML;
                 document.getElementById('btnBaixar').style.display = 'block';
 
-                // --- 2. PREPARAR DADOS PARA O DRIVE ---
-                // Transforma "Março de 2026" em "março 2026" para o nome do arquivo
                 const mesesParaArquivo = mesesSelecionados.map(m => m.text.replace(' de ', ' ').toLowerCase()).join(', ');
 
                 try {
@@ -1154,13 +1025,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                         body: JSON.stringify({
-                            nome: nomePagador,
-                            cim: cimPagador,
-                            numero: numeroRecibo,
-                            valor: valor,
-                            mesesRaw: mesesSelecionados,
-                            mesesText: mesesParaArquivo,
-                            motivo: descricao,
+                            nome: nomePagador, cim: cimPagador, numero: numeroRecibo, valor: valor, mesesRaw: mesesSelecionados, mesesText: mesesParaArquivo, motivo: descricao,
                             htmlDrive: `<html><body style="font-family:Arial;padding:40px;"><h2>RECIBO Nº ${numeroRecibo}</h2><p>Data: ${dataFormatada}</p><p>Nome: ${nomePagadorComCim}</p><p>Valor: R$ ${valorFormatado}</p><p>Referente a: ${mesosTexto || descricao}</p></body></html>`
                         })
                     });
@@ -1176,70 +1041,39 @@
         }
         
         function converterValorExtenso(valor) {
-            // Implementação simplificada - você pode usar uma biblioteca mais robusta
             const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
             const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
             const especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-            
             const partes = valor.toFixed(2).split('.');
             const reais = parseInt(partes[0]);
             const centavos = parseInt(partes[1]);
-            
             let extenso = '';
             
-            if (reais === 0) {
-                extenso = 'zero reais';
-            } else if (reais === 1) {
-                extenso = 'um real';
-            } else if (reais < 10) {
-                extenso = unidades[reais] + ' reais';
-            } else if (reais < 20) {
-                extenso = especiais[reais - 10] + ' reais';
-            } else if (reais < 100) {
+            if (reais === 0) extenso = 'zero reais';
+            else if (reais === 1) extenso = 'um real';
+            else if (reais < 10) extenso = unidades[reais] + ' reais';
+            else if (reais < 20) extenso = especiais[reais - 10] + ' reais';
+            else if (reais < 100) {
                 const d = Math.floor(reais / 10);
                 const u = reais % 10;
                 extenso = dezenas[d] + (u > 0 ? ' e ' + unidades[u] : '') + ' reais';
-            } else {
-                extenso = reais + ' reais';
-            }
+            } else extenso = reais + ' reais';
             
-            if (centavos > 0) {
-                extenso += ' e ' + centavos + ' centavos';
-            }
-            
+            if (centavos > 0) extenso += ' e ' + centavos + ' centavos';
             return extenso;
         }
 
         function baixarRecibo() {
-            // 1. Capturar dados (USANDO A MEMÓRIA GRAVADA NA GERAÇÃO)
-            // Se por algum motivo a memória estiver vazia, usa o input (fallback)
             const numero = numeroReciboGerado || document.getElementById('numeroRecibo').value;
             const nome = document.getElementById('nomePagador').value;
             const cim = document.getElementById('cimPagador').value;
-
-            // 2. Formatar meses (ex: Janeiro de 2026)
-            let mesesTexto = '';
-            if (mesesSelecionados.length > 0) {
-                // Remove " de " para ficar mais curto no nome do arquivo
-                mesesTexto = mesesSelecionados.map(m => m.text.replace(' de ', ' ')).join(', ');
-            } else {
-                mesesTexto = 'S-Mes';
-            }
-
-            // 3. Montar o nome do arquivo (Título da página)
+            let mesesTexto = mesesSelecionados.length > 0 ? mesesSelecionados.map(m => m.text.replace(' de ', ' ')).join(', ') : 'S-Mes';
             const nomeCim = cim ? `${nome} - CIM ${cim}` : nome;
             const novoTitulo = `Recibo ${numero} - ${nomeCim} - ${mesesTexto}`;
-
-            // 4. Trocar título temporariamente
             const tituloOriginal = document.title;
             document.title = novoTitulo;
-
             window.print();
-
-            // 5. Restaurar título original
-            setTimeout(() => {
-                document.title = tituloOriginal;
-            }, 2000);
+            setTimeout(() => { document.title = tituloOriginal; }, 2000);
         }
 
         function limparFormulario() {
@@ -1248,7 +1082,7 @@
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             mesesSelecionados = [];
-            numeroReciboGerado = ''; // Limpa a memória também
+            numeroReciboGerado = '';
             renderizarMeses();
             document.getElementById('preview').innerHTML = '<div class="empty-preview">Preencha os dados e clique em "Gerar Recibo" para visualizar aqui</div>';
             document.getElementById('btnBaixar').style.display = 'none';
