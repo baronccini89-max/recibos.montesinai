@@ -271,7 +271,30 @@
         .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
         .btn-cancel { background: #f5f5f5; color: #333; }
         .btn-confirm { background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%); color: white; }
-/* Estilos para o Grid de Meses */
+
+        .historico-item {
+            background: #f0f7ff; border: 1px solid #d4af37; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; border-left: 4px solid #d4af37;
+        }
+        .historico-item:hover { background: #e3f2fd; transform: translateX(5px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2); }
+        .historico-numero { font-weight: bold; color: #1a3a7a; font-size: 14px; }
+        .historico-detalhes { font-size: 12px; color: #666; margin-top: 5px; }
+        .historico-data { font-size: 11px; color: #999; margin-top: 3px; }
+
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+        .tab-button { flex: 1; padding: 12px; border: none; background: transparent; color: #1a3a7a; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; text-transform: uppercase; font-size: 13px; }
+        .tab-button.active { color: #d4af37; border-bottom-color: #d4af37; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .historico-vazio { text-align: center; color: #999; padding: 20px; font-size: 14px; }
+
+        .btn-historico { background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; flex: 0; padding: 12px 16px; font-size: 13px; gap: 5px; display: flex; align-items: center; }
+        .btn-historico:hover { background: #1a3a7a; color: white; }
+
+        .loading-indicator { display: none; background: #2196F3; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 14px; }
+        .loading-indicator.show { display: block; }
+        .info-badge { background: #e3f2fd; color: #1a3a7a; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-top: 10px; border-left: 4px solid #d4af37; }
+
+        /* Estilos para o Grid de Meses Múltiplos */
         .mes-checkbox-label {
             display: flex;
             align-items: center;
@@ -307,27 +330,6 @@
             border-color: #ddd;
             color: #999;
         }
-        .historico-item {
-            background: #f0f7ff; border: 1px solid #d4af37; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; border-left: 4px solid #d4af37;
-        }
-        .historico-item:hover { background: #e3f2fd; transform: translateX(5px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2); }
-        .historico-numero { font-weight: bold; color: #1a3a7a; font-size: 14px; }
-        .historico-detalhes { font-size: 12px; color: #666; margin-top: 5px; }
-        .historico-data { font-size: 11px; color: #999; margin-top: 3px; }
-
-        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
-        .tab-button { flex: 1; padding: 12px; border: none; background: transparent; color: #1a3a7a; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; text-transform: uppercase; font-size: 13px; }
-        .tab-button.active { color: #d4af37; border-bottom-color: #d4af37; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .historico-vazio { text-align: center; color: #999; padding: 20px; font-size: 14px; }
-
-        .btn-historico { background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; flex: 0; padding: 12px 16px; font-size: 13px; gap: 5px; display: flex; align-items: center; }
-        .btn-historico:hover { background: #1a3a7a; color: white; }
-
-        .loading-indicator { display: none; background: #2196F3; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 14px; }
-        .loading-indicator.show { display: block; }
-        .info-badge { background: #e3f2fd; color: #1a3a7a; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-top: 10px; border-left: 4px solid #d4af37; }
 
         /* ==================================================
            CONFIGURAÇÃO ESPECÍFICA PARA MOBILE (TELA)
@@ -528,7 +530,7 @@
                 <button type="button" onclick="adicionarMes()" style="background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; border-radius: 10px; padding: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;">+ Adicionar Mês</button>
             </div>
 
-<div id="modalMes" class="modal">
+            <div id="modalMes" class="modal">
                 <div class="modal-content" style="max-width: 500px;">
                     <h3>Selecione os Meses</h3>
                     
@@ -551,17 +553,7 @@
 
                     <div class="modal-buttons">
                         <button type="button" onclick="fecharModal()" class="btn-cancel">Cancelar</button>
-                        <button type="button" onclick="confirmarMesesMultiplos()" class="btn-confirm">Adicionar Selecionados</button>
-                    </div>
-                </div>
-            </div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Ano</label>
-                            <input type="number" id="selectAno" value="2026" min="2000" max="2099" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;">
-                        </div>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="button" onclick="fecharModal()" class="btn-cancel">Cancelar</button>
-                        <button type="button" onclick="confirmarMes()" class="btn-confirm">Adicionar</button>
+                        <button type="button" onclick="confirmarMesesMultiplos()" class="btn-confirm">Adicionar</button>
                     </div>
                 </div>
             </div>
@@ -921,30 +913,15 @@
             document.getElementById('numeroRecibo').value = numeroReceboAtual;
         }
 
-        function adicionarMes() {
-            document.getElementById('modalMes').classList.add('active');
-            const hoje = new Date();
-            document.getElementById('selectMes').value = hoje.getMonth();
-            document.getElementById('selectAno').value = hoje.getFullYear();
-        }
-
-        function fecharModal() {
-            document.getElementById('modalMes').classList.remove('active');
-        }
-
-const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         function adicionarMes() {
             document.getElementById('modalMes').classList.add('active');
-            
-            // Sugere o último ano adicionado ou o ano atual
             const hoje = new Date();
             let anoSugerido = hoje.getFullYear();
-            
             if (mesesSelecionados.length > 0) {
                 anoSugerido = mesesSelecionados[mesesSelecionados.length - 1].ano;
             }
-            
             document.getElementById('inputAnoMultiplo').value = anoSugerido;
             gerarGridMeses(anoSugerido);
         }
@@ -970,7 +947,7 @@ const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
             grid.innerHTML = '';
             
             nomesMeses.forEach((mesNome, index) => {
-                const mesText = `${mesNome} de ${ano}`; // Letra maiúscula no mês
+                const mesText = `${mesNome} de ${ano}`;
                 const jaAdicionado = mesesSelecionados.some(m => m.text === mesText);
                 
                 const div = document.createElement('div');
@@ -998,7 +975,6 @@ const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
             const checkboxes = document.querySelectorAll('.mes-checkbox-input:checked:not(:disabled)');
             
             if (checkboxes.length === 0) {
-                // Se não marcou nada, apenas fecha
                 fecharModal();
                 return;
             }
@@ -1011,7 +987,6 @@ const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                 mesesSelecionados.push({ mes: mesIndex, ano: ano, text: mesText });
             });
 
-            // Ordena cronologicamente
             mesesSelecionados.sort((a, b) => {
                 if (a.ano !== b.ano) return a.ano - b.ano;
                 return a.mes - b.mes;
@@ -1023,8 +998,8 @@ const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
 
         function removerMes(btn) {
             const container = document.getElementById('mesosContainer');
-            const items = container.querySelectorAll('div');
-            const index = Array.from(items).indexOf(btn.closest('div'));
+            const items = Array.from(container.children);
+            const index = items.indexOf(btn.closest('div'));
             if (index > -1) {
                 mesesSelecionados.splice(index, 1);
                 renderizarMeses();
