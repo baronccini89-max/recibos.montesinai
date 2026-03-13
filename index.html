@@ -271,7 +271,42 @@
         .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
         .btn-cancel { background: #f5f5f5; color: #333; }
         .btn-confirm { background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%); color: white; }
-
+/* Estilos para o Grid de Meses */
+        .mes-checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 5px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: #f8f9fa;
+            user-select: none;
+            text-align: center;
+            color: #555;
+        }
+        
+        .mes-checkbox-input {
+            display: none;
+        }
+        
+        .mes-checkbox-input:checked + .mes-checkbox-label {
+            background: #e3f2fd;
+            border-color: #1a3a7a;
+            color: #1a3a7a;
+            transform: scale(1.02);
+        }
+        
+        .mes-checkbox-input:disabled + .mes-checkbox-label {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            border-color: #ddd;
+            color: #999;
+        }
         .historico-item {
             background: #f0f7ff; border: 1px solid #d4af37; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; border-left: 4px solid #d4af37;
         }
@@ -493,28 +528,33 @@
                 <button type="button" onclick="adicionarMes()" style="background: #e3f2fd; color: #1a3a7a; border: 2px solid #1a3a7a; border-radius: 10px; padding: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;">+ Adicionar Mês</button>
             </div>
 
-            <div id="modalMes" class="modal">
-                <div class="modal-content">
-                    <h3>Selecione Mês e Ano</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Mês</label>
-                            <select id="selectMes" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
-                                <option value="0">Janeiro</option>
-                                <option value="1">Fevereiro</option>
-                                <option value="2">Março</option>
-                                <option value="3">Abril</option>
-                                <option value="4">Maio</option>
-                                <option value="5">Junho</option>
-                                <option value="6">Julho</option>
-                                <option value="7">Agosto</option>
-                                <option value="8">Setembro</option>
-                                <option value="9">Outubro</option>
-                                <option value="10">Novembro</option>
-                                <option value="11">Dezembro</option>
-                            </select>
+<div id="modalMes" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3>Selecione os Meses</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Ano de Referência</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button type="button" onclick="mudarAno(-1)" style="padding: 10px 15px; border: 2px solid #e8e8e8; background: #f8f9fa; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">&lt;</button>
+                            <input type="number" id="inputAnoMultiplo" value="2026" min="2000" max="2099" style="flex: 1; text-align: center; font-size: 18px; font-weight: bold;" onchange="atualizarCheckboxesAno()">
+                            <button type="button" onclick="mudarAno(1)" style="padding: 10px 15px; border: 2px solid #e8e8e8; background: #f8f9fa; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">&gt;</button>
                         </div>
-                        <div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Meses</label>
+                        <button type="button" onclick="marcarTodosMeses()" style="background: none; border: none; color: #d4af37; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: underline;">Marcar Todos</button>
+                    </div>
+
+                    <div id="gridMeses" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px;">
+                        </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" onclick="fecharModal()" class="btn-cancel">Cancelar</button>
+                        <button type="button" onclick="confirmarMesesMultiplos()" class="btn-confirm">Adicionar Selecionados</button>
+                    </div>
+                </div>
+            </div>
                             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a3a7a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Ano</label>
                             <input type="number" id="selectAno" value="2026" min="2000" max="2099" style="width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;">
                         </div>
@@ -892,19 +932,91 @@
             document.getElementById('modalMes').classList.remove('active');
         }
 
-        function confirmarMes() {
-            const mesIndex = parseInt(document.getElementById('selectMes').value);
-            const ano = parseInt(document.getElementById('selectAno').value);
-            const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-            const mesNome = meses[mesIndex];
-            const mesText = `${mesNome} de ${ano}`;
+const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-            if (mesesSelecionados.some(m => m.text === mesText)) {
-                alert('Este mês já foi adicionado');
+        function adicionarMes() {
+            document.getElementById('modalMes').classList.add('active');
+            
+            // Sugere o último ano adicionado ou o ano atual
+            const hoje = new Date();
+            let anoSugerido = hoje.getFullYear();
+            
+            if (mesesSelecionados.length > 0) {
+                anoSugerido = mesesSelecionados[mesesSelecionados.length - 1].ano;
+            }
+            
+            document.getElementById('inputAnoMultiplo').value = anoSugerido;
+            gerarGridMeses(anoSugerido);
+        }
+
+        function fecharModal() {
+            document.getElementById('modalMes').classList.remove('active');
+        }
+
+        function mudarAno(delta) {
+            const input = document.getElementById('inputAnoMultiplo');
+            const novoAno = parseInt(input.value) + delta;
+            input.value = novoAno;
+            gerarGridMeses(novoAno);
+        }
+
+        function atualizarCheckboxesAno() {
+            const ano = parseInt(document.getElementById('inputAnoMultiplo').value);
+            gerarGridMeses(ano);
+        }
+
+        function gerarGridMeses(ano) {
+            const grid = document.getElementById('gridMeses');
+            grid.innerHTML = '';
+            
+            nomesMeses.forEach((mesNome, index) => {
+                const mesText = `${mesNome} de ${ano}`; // Letra maiúscula no mês
+                const jaAdicionado = mesesSelecionados.some(m => m.text === mesText);
+                
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <input type="checkbox" id="chkMes_${index}" class="mes-checkbox-input" value="${index}" ${jaAdicionado ? 'disabled checked' : ''}>
+                    <label for="chkMes_${index}" class="mes-checkbox-label">
+                        ${mesNome.substring(0, 3)}
+                    </label>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function marcarTodosMeses() {
+            const checkboxes = document.querySelectorAll('.mes-checkbox-input:not(:disabled)');
+            const todosMarcados = Array.from(checkboxes).every(chk => chk.checked);
+            
+            checkboxes.forEach(chk => {
+                chk.checked = !todosMarcados;
+            });
+        }
+
+        function confirmarMesesMultiplos() {
+            const ano = parseInt(document.getElementById('inputAnoMultiplo').value);
+            const checkboxes = document.querySelectorAll('.mes-checkbox-input:checked:not(:disabled)');
+            
+            if (checkboxes.length === 0) {
+                // Se não marcou nada, apenas fecha
+                fecharModal();
                 return;
             }
 
-            mesesSelecionados.push({ mes: mesIndex, ano: ano, text: mesText });
+            checkboxes.forEach(chk => {
+                const mesIndex = parseInt(chk.value);
+                const mesNome = nomesMeses[mesIndex];
+                const mesText = `${mesNome} de ${ano}`;
+                
+                mesesSelecionados.push({ mes: mesIndex, ano: ano, text: mesText });
+            });
+
+            // Ordena cronologicamente
+            mesesSelecionados.sort((a, b) => {
+                if (a.ano !== b.ano) return a.ano - b.ano;
+                return a.mes - b.mes;
+            });
+
             renderizarMeses();
             fecharModal();
         }
