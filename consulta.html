@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal do Irmão - Monte Sinai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 50%, #d4af37 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 100px;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        h1 {
+            color: #1a3a7a;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1a3a7a;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            padding: 15px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+            background-color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 58, 122, 0.3);
+        }
+
+        /* Área de Resultado */
+        #resultadoArea {
+            display: none;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-ano {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .status-ano:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .ano-titulo {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .status-ok {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .status-ok .ano-titulo { color: #2e7d32; }
+
+        .status-pendente {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .status-pendente .ano-titulo { color: #d32f2f; }
+        
+        .status-texto {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            color: #1a3a7a;
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        .rodape {
+            margin-top: 25px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Puxa a mesma logo que você já subiu no GitHub -->
+        <img src="./logo.png" alt="Logo Monte Sinai" class="logo-img">
+        
+        <h1>Portal do Irmão</h1>
+        <p class="subtitle">Consulta de Situação Financeira</p>
+
+        <div class="form-group">
+            <label for="cimInput">Digite seu CIM</label>
+            <input type="number" id="cimInput" placeholder="Ex: 26611">
+        </div>
+
+        <button onclick="consultarCIM()">Consultar</button>
+
+        <div id="resultadoArea">
+            <!-- Os resultados aparecerão aqui -->
+        </div>
+
+        <div class="rodape">
+            Loja Simbólica Monte Sinai nº 371<br>
+            Tesouraria - Gestão 2025/2026
+        </div>
+    </div>
+
+    <script>
+        // API Oficial da Tesouraria
+        const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
+
+        async function consultarCIM() {
+            const cim = document.getElementById('cimInput').value.trim();
+            const resultadoArea = document.getElementById('resultadoArea');
+
+            if (!cim) {
+                alert('Por favor, informe um número de CIM válido.');
+                return;
+            }
+
+            // Exibir estado de carregamento
+            resultadoArea.style.display = 'block';
+            resultadoArea.className = 'loading';
+            resultadoArea.innerHTML = '🔄 Buscando registros...';
+
+            try {
+                const response = await fetch(`${URL_API_PLANILHAS}?cim=${cim}`);
+                const data = await response.json();
+
+                if (data.error || (data["2025"] === "" && data["2026"] === "")) {
+                    resultadoArea.className = 'status-pendente';
+                    resultadoArea.innerHTML = '<div class="status-texto">⚠️ CIM não encontrado na base de dados ou sem registros. Procure a tesouraria.</div>';
+                    return;
+                }
+
+                let htmlContent = '';
+                let temPendenciaGeral = false;
+
+                // Montar visual para 2025 e 2026
+                ['2025', '2026'].forEach(ano => {
+                    const status = (data[ano] || '').toUpperCase();
+                    
+                    if (status === '' || status === 'PAGO' || status === 'ISENTO') {
+                        htmlContent += `
+                            <div class="status-ano">
+                                <div class="ano-titulo" style="color: #2e7d32;">${ano}</div>
+                                <div class="status-texto">Situação: <b>Regular (Tudo Quitado) ✅</b></div>
+                            </div>
+                        `;
+                    } else {
+                        htmlContent += `
+                            <div class="status-ano">
+                                <div class="ano-titulo" style="color: #d32f2f;">${ano}</div>
+                                <div class="status-texto">Situação: <b>Pendente</b> ❌<br>Meses em aberto: ${status}</div>
+                            </div>
+                        `;
+                        temPendenciaGeral = true;
+                    }
+                });
+
+                // Define a cor da caixa inteira baseada no status geral
+                resultadoArea.className = temPendenciaGeral ? 'status-pendente' : 'status-ok';
+                resultadoArea.innerHTML = htmlContent;
+
+            } catch (error) {
+                resultadoArea.className = 'status-pendente';
+                resultadoArea.innerHTML = '<div class="status-texto">⚠️ Erro ao se conectar com a Tesouraria. Tente novamente.</div>';
+            }
+        }
+    </script>
+</body>
+</html>
