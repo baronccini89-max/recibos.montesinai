@@ -494,11 +494,11 @@
             <div class="form-group">
                 <label for="cimPagador">CIM</label>
                 <input type="text" id="cimPagador" placeholder="Preenchido automaticamente" readonly style="background-color: #e8f4f8; cursor: not-allowed;">
-            </div>
-
-            <div class="form-group">
-                <label for="valor">Valor (R$)</label>
-                <input type="number" id="valor" placeholder="0.00" step="0.01" min="0">
+                
+                <!-- CAIXA DE STATUS -->
+                <div id="statusFinanceiroContainer" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 13px;">
+                    <div id="statusFinanceiroTexto">⏳ Consultando planilhas em tempo real...</div>
+                </div>
             </div>
 
             <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
@@ -647,18 +647,79 @@
             datalistPagadores.appendChild(option);
         });
 
+        // ========== VARIÁVEIS DA INTEGRAÇÃO COM PLANILHA ==========
+        const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec'; 
+        let pendenciasGlobal = { '2025': [], '2026': [] };
+        const mapaMeses = {
+            'JAN': 0, 'FEV': 1, 'MAR': 2, 'ABR': 3, 'MAI': 4, 'JUN': 5,
+            'JUL': 6, 'AGO': 7, 'SET': 8, 'OUT': 9, 'NOV': 10, 'DEZ': 11
+        };
+
         const inputNomePagador = document.getElementById('nomePagador');
         const inputCimPagador = document.getElementById('cimPagador');
 
-        inputNomePagador.addEventListener('change', () => {
+        inputNomePagador.addEventListener('change', async () => {
             const valor = inputNomePagador.value.trim();
             const encontrado = cadastroPagadores.find(p => p.nome === valor);
+            const statusContainer = document.getElementById('statusFinanceiroContainer');
+            
             if (encontrado) {
                 inputCimPagador.value = encontrado.cim;
+                if(typeof consultarPlanilha === 'function') {
+                    await consultarPlanilha(encontrado.cim);
+                }
             } else {
                 inputCimPagador.value = "";
+                if(statusContainer) statusContainer.style.display = 'none';
+                pendenciasGlobal = { '2025': [], '2026': [] };
             }
         });
+
+        async function consultarPlanilha(cim) {
+            const statusContainer = document.getElementById('statusFinanceiroContainer');
+            const statusTexto = document.getElementById('statusFinanceiroTexto');
+            
+            statusContainer.style.display = 'block';
+            statusContainer.style.background = '#e3f2fd';
+            statusContainer.style.borderLeftColor = '#2196F3';
+            statusTexto.innerHTML = '⏳ Consultando pagamentos na planilha...';
+            pendenciasGlobal = { '2025': [], '2026': [] };
+
+            try {
+                const response = await fetch(`${URL_API_PLANILHAS}?cim=${cim}`);
+                const data = await response.json();
+                
+                if(data.error) {
+                    statusTexto.innerHTML = '⚠️ Erro ao buscar dados na planilha.';
+                    return;
+                }
+
+                let htmlStatus = '<strong>📊 Status Financeiro (Tempo Real):</strong><br>';
+                let temPendencia = false;
+
+                ['2025', '2026'].forEach(ano => {
+                    const statusAno = (data[ano] || '').toUpperCase();
+                    
+                    if (statusAno === '' || statusAno === 'PAGO' || statusAno === 'ISENTO') {
+                        htmlStatus += `<span style="color: #2e7d32;"><b>${ano}:</b> Tudo Quitado! (${statusAno || 'Nenhum débito'})</span><br>`;
+                    } else {
+                        const mesesDevendo = statusAno.split(',').map(m => m.trim());
+                        pendenciasGlobal[ano] = mesesDevendo.map(sigla => mapaMeses[sigla]).filter(n => n !== undefined);
+                        htmlStatus += `<span style="color: #d32f2f;"><b>${ano}:</b> Faltam ${statusAno}</span><br>`;
+                        temPendencia = true;
+                    }
+                });
+
+                statusContainer.style.background = temPendencia ? '#fff3cd' : '#e8f5e9';
+                statusContainer.style.borderLeftColor = temPendencia ? '#ffc107' : '#4CAF50';
+                statusTexto.innerHTML = htmlStatus;
+
+            } catch (error) {
+                statusContainer.style.background = '#ffebee';
+                statusContainer.style.borderLeftColor = '#f44336';
+                statusTexto.innerHTML = '⚠️ Falha de comunicação com a API.';
+            }
+        }
 
         let mesesSelecionados = [];
         let numeroReceboAtual = '2026-02';
@@ -863,14 +924,31 @@
             const grid = document.getElementById('gridMeses');
             grid.innerHTML = '';
             
+            const anoStr = ano.toString();
+            const cimPreenchido = document.getElementById('cimPagador').value !== '';
+            
             nomesMeses.forEach((mesNome, index) => {
                 const mesText = `${mesNome} de ${ano}`;
                 const jaAdicionado = mesesSelecionados.some(m => m.text === mesText);
                 
+                // Trava Inteligente da Planilha Telegram
+                let pago = false;
+                if (cimPreenchido && pendenciasGlobal[anoStr] !== undefined) {
+                    if (!pendenciasGlobal[anoStr].includes(index)) {
+                        pago = true;
+                    }
+                }
+                
+                const bloqueado = jaAdicionado || pago;
+                const attrDisabled = bloqueado ? 'disabled' : '';
+                const attrChecked = jaAdicionado ? 'checked' : '';
+                
+                const extraStyle = pago && !jaAdicionado ? 'style="opacity: 0.4; cursor: not-allowed; text-decoration: line-through;" title="Mês não possui débitos"' : '';
+
                 const div = document.createElement('div');
                 div.innerHTML = `
-                    <input type="checkbox" id="chkMes_${index}" class="mes-checkbox-input" value="${index}" ${jaAdicionado ? 'disabled checked' : ''}>
-                    <label for="chkMes_${index}" class="mes-checkbox-label">
+                    <input type="checkbox" id="chkMes_${index}" class="mes-checkbox-input" value="${index}" ${attrDisabled} ${attrChecked}>
+                    <label for="chkMes_${index}" class="mes-checkbox-label" ${extraStyle}>
                         ${mesNome.substring(0, 3)}
                     </label>
                 `;
