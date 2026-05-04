@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login - Monte Sinai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 50%, #d4af37 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 120px;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        h2 {
+            color: #1a3a7a;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        input {
+            padding: 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+            background-color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 58, 122, 0.3);
+        }
+
+        .error-msg {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .rodape {
+            margin-top: 25px;
+            font-size: 11px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <img src="./logo.png" alt="Logo Monte Sinai" class="logo-img">
+        <h2>Acesso Restrito</h2>
+        <p>Aplicativo da Tesouraria</p>
+
+        <div class="form-group">
+            <input type="email" id="emailInput" placeholder="Seu e-mail">
+            <input type="password" id="senhaInput" placeholder="Sua senha">
+        </div>
+
+        <button id="btnEntrar">Entrar no App</button>
+        <div id="errorMsg" class="error-msg">E-mail ou senha incorretos.</div>
+
+        <div class="rodape">
+            Loja Simbólica Monte Sinai nº 371
+        </div>
+    </div>
+
+    <!-- Importação dos módulos de Autenticação do Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Suas credenciais originais do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const btnEntrar = document.getElementById('btnEntrar');
+        const errorMsg = document.getElementById('errorMsg');
+
+        btnEntrar.addEventListener('click', () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const senha = document.getElementById('senhaInput').value.trim();
+
+            if(!email || !senha) {
+                errorMsg.innerText = 'Preencha todos os campos.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Muda o texto do botão para dar um retorno visual
+            btnEntrar.innerText = 'Aguarde...';
+            errorMsg.style.display = 'none';
+
+            // Tenta fazer o login no Firebase
+            signInWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    alert('SUCESSO! O Firebase reconheceu o seu login: ' + user.email);
+                    
+                    // No futuro, este código vai redirecionar para a página correta:
+                    // window.location.href = "admin.html";
+                    
+                    btnEntrar.innerText = 'Entrar no App';
+                })
+                .catch((error) => {
+                    errorMsg.innerText = 'Erro: Usuário não encontrado ou senha incorreta.';
+                    errorMsg.style.display = 'block';
+                    btnEntrar.innerText = 'Entrar no App';
+                });
+        });
+    </script>
+</body>
+</html>
