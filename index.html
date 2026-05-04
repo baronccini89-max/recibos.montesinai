@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - Monte Sinai</title>
     <style>
+        /* ================= ESTILOS GERAIS ================= */
         * {
             margin: 0;
             padding: 0;
@@ -138,7 +139,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // Suas credenciais originais do Firebase
+        // Credenciais do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
             authDomain: "monte-sinai-recibos.firebaseapp.com",
@@ -154,6 +155,7 @@
         const btnEntrar = document.getElementById('btnEntrar');
         const errorMsg = document.getElementById('errorMsg');
 
+        // Lógica executada ao clicar no botão "Entrar"
         btnEntrar.addEventListener('click', () => {
             const email = document.getElementById('emailInput').value.trim();
             const senha = document.getElementById('senhaInput').value.trim();
@@ -164,20 +166,24 @@
                 return;
             }
 
-            // Muda o texto do botão para dar um retorno visual
-            btnEntrar.innerText = 'Aguarde...';
+            // Interface de carregamento
+            btnEntrar.innerText = 'Autenticando...';
             errorMsg.style.display = 'none';
 
-            // Tenta fazer o login no Firebase
+            // Autenticação com o Firebase
             signInWithEmailAndPassword(auth, email, senha)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    alert('SUCESSO! O Firebase reconheceu o seu login: ' + user.email);
                     
-                    // No futuro, este código vai redirecionar para a página correta:
-                    // window.location.href = "admin.html";
-                    
-                    btnEntrar.innerText = 'Entrar no App';
+                    // LÓGICA DE REDIRECIONAMENTO INTELIGENTE
+                    // Verifica se o email logado é o do administrador
+                    if (user.email === 'baronccini89@gmail.com') {
+                        // Se for o tesoureiro, vai para o Gerador de Recibos
+                        window.location.href = "admin.html";
+                    } else {
+                        // Se for qualquer outro irmão, vai para o Portal do Membro
+                        window.location.href = "membro.html";
+                    }
                 })
                 .catch((error) => {
                     errorMsg.innerText = 'Erro: Usuário não encontrado ou senha incorreta.';
