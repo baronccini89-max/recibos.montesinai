@@ -29,12 +29,11 @@
         header h1 { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
         header p { font-size: 13px; color: #d4af37; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         
-        .user-info { font-size: 14px; margin-top: 12px; background: rgba(255,255,255,0.15); padding: 6px 18px; border-radius: 20px; display: inline-block; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3);}
+        /* Modificado para caber o nome do irmão elegantemente */
+        .user-info { font-size: 14px; margin-top: 12px; background: rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 20px; display: inline-block; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3); max-width: 90%; word-wrap: break-word;}
 
-        /* Área de Conteúdo */
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
 
-        /* Mensagem de Boas Vindas */
         .welcome-box {
             background: #e3f2fd;
             border-left: 4px solid #1a3a7a;
@@ -42,29 +41,42 @@
             padding: 18px 20px;
             margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            text-align: center;
         }
-        .welcome-box h2 { color: #1a3a7a; font-size: 18px; margin-bottom: 6px; font-weight: 700; }
-        .welcome-box p { font-size: 14px; color: #444; line-height: 1.6; }
+        .welcome-box h2 { color: #1a3a7a; font-size: 18px; margin-bottom: 10px; font-weight: 700; }
+        .welcome-box p { font-size: 14px; color: #444; line-height: 1.6; text-align: justify; }
 
         .card {
             background: white; border-radius: 16px; padding: 22px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            margin-bottom: 20px; text-align: left;
+            margin-bottom: 20px; text-align: center;
         }
 
-        .card-title { color: #1a3a7a; font-size: 16px; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+        .card-title { color: #1a3a7a; font-size: 16px; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;}
 
-        /* Status Financeiro */
-        .status-ano { margin-bottom: 15px; padding: 15px; border-radius: 12px; }
+        /* Informação da Mensalidade */
+        .info-mensalidade {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+            text-align: center;
+        }
+        .info-mensalidade strong { color: #1a3a7a; font-size: 15px; }
+
+        .status-ano { margin-bottom: 15px; padding: 15px; border-radius: 12px; text-align: left; }
         .status-ano:last-child { margin-bottom: 0; }
         
         .ano-titulo { font-weight: 700; font-size: 18px; margin-bottom: 5px; }
-        .status-texto { font-size: 14px; line-height: 1.5; }
+        .status-texto { font-size: 14px; line-height: 1.5; text-align: justify; }
+        .meses-vencer { font-size: 12px; color: #666; margin-top: 8px; font-style: italic; border-top: 1px dashed #ccc; padding-top: 8px;}
 
         .status-ok { background: #e8f5e9; border-left: 4px solid #4CAF50; color: #2e7d32; }
         .status-pendente { background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; }
         .status-erro { background: #ffebee; border-left: 4px solid #f44336; color: #c62828; }
 
-        /* Caixa de Valor Total */
         .caixa-valor-total {
             background: #ffebee;
             border: 2px solid #ef5350;
@@ -77,7 +89,6 @@
         .caixa-valor-total .rotulo { font-size: 13px; color: #c62828; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
         .caixa-valor-total .valor { font-size: 28px; color: #b71c1c; font-weight: 800; margin-top: 5px;}
 
-        /* Estilo Aprimorado para a área do PIX e Botão Copiar */
         .pix-box {
             background: #f8f9fa;
             border: 2px dashed #d4af37;
@@ -89,63 +100,32 @@
         .pix-box p { font-size: 13px; color: #444; margin-bottom: 8px; line-height: 1.4;}
         
         .pix-chave-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; margin-top: 10px;
         }
         .pix-chave { 
-            font-size: 20px; 
-            font-weight: 700; 
-            color: #1a3a7a; 
-            background: #e3f2fd; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
-            letter-spacing: 1px;
-            border: 1px solid #bbdefb;
+            font-size: 20px; font-weight: 700; color: #1a3a7a; background: #e3f2fd; padding: 10px 20px; border-radius: 8px; letter-spacing: 1px; border: 1px solid #bbdefb;
         }
         
         .btn-copiar {
-            background: #1a3a7a;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background: #1a3a7a; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .btn-copiar:hover { background: #2c5aa0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(26, 58, 122, 0.2); }
 
-        /* Botão de Comprovante */
         .upload-section { text-align: center; margin-top: 10px; }
         .btn-upload {
-            width: 100%; padding: 16px; background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%); color: #fff; border: none; border-radius: 12px;
-            font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .btn-upload:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
 
-        .upload-status { margin-top: 15px; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px; }
+        .upload-status { margin-top: 15px; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px; text-align: center; }
 
         .btn-sair {
-            width: 100%; padding: 14px; background: transparent; color: #f44336; border: 2px solid #f44336; border-radius: 12px;
-            font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 10px; margin-bottom: 30px;
+            width: 100%; padding: 14px; background: transparent; color: #f44336; border: 2px solid #f44336; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 10px; margin-bottom: 30px;
         }
         .btn-sair:hover { background: #f44336; color: white; }
 
-        /* Tela de Carregamento */
         #telaCarregamento {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white;
-            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a7a; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         
@@ -163,23 +143,28 @@
 
     <header>
         <img src="./logo.png" alt="Logo Monte Sinai" class="logo-img">
-        <h1>Loja Monte Sinai nº 371</h1>
+        <h1>Loja Monte Sinai Nº 371</h1>
         <p>Área Restrita</p>
-        <div class="user-info" id="identificacaoIrmao">CIM: Carregando...</div>
+        <div class="user-info" id="identificacaoIrmao">Identificando Irmão...</div>
     </header>
 
     <div class="container">
         
-        <!-- MENSAGEM DE BOAS VINDAS -->
         <div class="welcome-box">
-            <h2>Saudações Fraternais, Amado Irmão! 🤝</h2>
+            <h2>Saudações Fraternais! 🤝</h2>
             <p>É uma alegria recebê-lo em nosso portal digital. Que este ambiente seja sempre Justo e Perfeito para mantermos nossa oficina fortalecida. Receba um T.F.A. da tesouraria.</p>
         </div>
 
         <div class="card">
             <h2 class="card-title">📊 Pranchada Financeira</h2>
+            
+            <div class="info-mensalidade">
+                Valor atual da mensalidade: <strong>R$ 90,00</strong><br>
+                <span style="font-size: 11px; color: #888;" id="dataAtualizacao"></span>
+            </div>
+
             <div id="areaResultados">
-                <div class="status-ano status-pendente">
+                <div class="status-ano status-pendente" style="text-align: center;">
                     <div class="status-texto">Consultando os registros da Tesouraria...</div>
                 </div>
             </div>
@@ -216,7 +201,6 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        // Note que o firebase-storage foi removido daqui! Apenas o Firestore continua para salvar os dados do recibo.
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -233,54 +217,88 @@
         const db = getFirestore(app);
 
         // =========================================================================================
-        // ATENÇÃO: COLOQUE A SUA NOVA URL DO GOOGLE APPS SCRIPT ABAIXO!
+        // ATENÇÃO: COLOQUE A SUA URL DO GOOGLE APPS SCRIPT ABAIXO!
         // =========================================================================================
         const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
+
+        // Lista de Irmãos para identificar o nome pelo CIM
+        const cadastroPagadores = [
+            { nome: "Adriano Locateli Da Rosa", cim: "27529" }, { nome: "Agnelo Francisco Chiodo", cim: "19337" },
+            { nome: "Alexandre Coimbra Martins", cim: "27530" }, { nome: "Celso Jose Costatulio Da Silva Esteves", cim: "10967" },
+            { nome: "Cicero Marcos Vagre Rodrigues", cim: "16272" }, { nome: "Claudio Tione Scherer De Melo", cim: "17607" },
+            { nome: "Delmar De Avila Leal", cim: "10234" }, { nome: "Edison Lourenço Verdi", cim: "11344" },
+            { nome: "Eduardo Edson Domingues Soares", cim: "18374" }, { nome: "Eduardo Germano Felker Andreis", cim: "23407" },
+            { nome: "Eduardo Moura Mendes", cim: "16844" }, { nome: "Eduardo Niederauer Silveira De Morais", cim: "22532" },
+            { nome: "Eduardo Sibemberg Saint Pierre", cim: "20557" }, { nome: "Evanir De Castro Santana", cim: "11533" },
+            { nome: "Felipe Chiva Querol", cim: "25417" }, { nome: "Guilherme Faria Almeida", cim: "28210" },
+            { nome: "Guilherme Mallmann Cancelli", cim: "22533" }, { nome: "Gustavo Lutz Baggio", cim: "25418" },
+            { nome: "Ivens Giuliano Campos Dos Santos", cim: "15003" }, { nome: "Jaime Moises Wainer", cim: "10511" },
+            { nome: "Janrie Silva de Oliveira", cim: "28181" }, { nome: "Jefferson De Barros Jacques", cim: "17878" },
+            { nome: "Jorcei Soares Chiochetta", cim: "27603" }, { nome: "Jorge Dirceu Abreu Silva Filho", cim: "23409" },
+            { nome: "Jose Carlos Dos Santos Junior", cim: "27488" }, { nome: "Jose Ricardo Neves De Lima", cim: "16206" },
+            { nome: "Leao David Unikowsky", cim: "17880" }, { nome: "Lucas Souza Baronccini", cim: "26611" },
+            { nome: "Lucio Baumhardt Batista", cim: "27489" }, { nome: "Luigi Gustavo Soares Pereira", cim: "15845" },
+            { nome: "Luiz Fernando Silva De Oliveira", cim: "10241" }, { nome: "Marcelo Antonio Guimaraes Flach", cim: "18207" },
+            { nome: "Marcelo Clementel De Araújo", cim: "22006" }, { nome: "Marcelo Pureza Verdi", cim: "27502" },
+            { nome: "Mauricio dos Santos Brum", cim: "28180" }, { nome: "Moacir Sibemberg", cim: "10244" },
+            { nome: "Mohamad Mazzini Abdelaziz", cim: "25419" }, { nome: "Osmar Oliveira Neves Filho", cim: "20149" },
+            { nome: "Pedro Carlos Oliveira Moreira", cim: "16277" }, { nome: "Rafael Vagner Nobre", cim: "26613" },
+            { nome: "Rogerio Araujo De Souza", cim: "23449" }, { nome: "Rogerio Silveira Torres", cim: "18931" },
+            { nome: "Sergio Edson Domingues Soares", cim: "14415" }, { nome: "Sidney Ochman", cim: "10250" },
+            { nome: "Thiago Neves Machado", cim: "28322" }, { nome: "Thomaz Jose Mendonça Rodrigues", cim: "19339" },
+            { nome: "Victor Elencave", cim: "22007" }
+        ];
 
         const telaCarregamento = document.getElementById('telaCarregamento');
         const identificacaoIrmao = document.getElementById('identificacaoIrmao');
         const areaResultados = document.getElementById('areaResultados');
         const areaValorTotal = document.getElementById('areaValorTotal');
         const btnSair = document.getElementById('btnSair');
+        const dataAtualizacao = document.getElementById('dataAtualizacao');
         
         const fileInput = document.getElementById('arquivoComprovante');
         const btnUploadClick = document.getElementById('btnUploadClick');
         const uploadStatus = document.getElementById('uploadStatus');
-        
         const btnCopiarPix = document.getElementById('btnCopiarPix');
 
         let cimGlobal = "";
 
-        // ================= LÓGICA DO BOTÃO COPIAR PIX =================
+        // Preenche a data de hoje formatada
+        const hoje = new Date();
+        dataAtualizacao.innerText = `Data de referência: ${hoje.toLocaleDateString('pt-BR')}`;
+
+        // Mapa para a inteligência dos meses
+        const mapaMeses = { 'JAN': 0, 'FEV': 1, 'MAR': 2, 'ABR': 3, 'MAI': 4, 'JUN': 5, 'JUL': 6, 'AGO': 7, 'SET': 8, 'OUT': 9, 'NOV': 10, 'DEZ': 11 };
+
         btnCopiarPix.addEventListener('click', () => {
             const chaveCnpj = "07.866.461/0001-90";
-            
             navigator.clipboard.writeText(chaveCnpj).then(() => {
                 btnCopiarPix.innerText = '✅ PIX Copiado!';
                 btnCopiarPix.style.background = '#4CAF50';
-                
                 setTimeout(() => {
                     btnCopiarPix.innerText = '📋 Copiar Chave';
                     btnCopiarPix.style.background = '#1a3a7a';
                 }, 3000);
             }).catch(err => {
-                console.error('Erro ao copiar a chave', err);
                 alert('Não foi possível copiar automaticamente. Selecione o texto do CNPJ e copie.');
             });
         });
 
-        // ================= LÓGICA DE SEGURANÇA E CONSULTA =================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 cimGlobal = user.displayName;
 
                 if (!cimGlobal) {
-                    areaResultados.innerHTML = `<div class="status-ano status-erro"><div class="status-texto">Erro: CIM não encontrado no seu perfil. Por favor, contate o tesoureiro.</div></div>`;
+                    areaResultados.innerHTML = `<div class="status-ano status-erro" style="text-align: center;"><div class="status-texto">Erro: CIM não encontrado no seu perfil.</div></div>`;
                     telaCarregamento.style.display = 'none';
                     return;
                 }
 
-                identificacaoIrmao.innerText = `CIM: ${cimGlobal}`;
+                // Identifica o nome do Irmão
+                const irmaoLogado = cadastroPagadores.find(p => p.cim === cimGlobal);
+                const nomeExibicao = irmaoLogado ? irmaoLogado.nome : "Amado Irmão";
+                identificacaoIrmao.innerText = `${nomeExibicao} (CIM: ${cimGlobal})`;
+
                 await realizarConsultaFinanceira(cimGlobal);
                 telaCarregamento.style.display = 'none';
             } else {
@@ -294,23 +312,56 @@
                 const data = await response.json();
 
                 if (data.error || (data["2025"] === "" && data["2026"] === "")) {
-                    areaResultados.innerHTML = `<div class="status-ano status-erro"><div class="status-texto">⚠️ Nenhum registro financeiro encontrado para o seu CIM. Procure a tesouraria.</div></div>`;
+                    areaResultados.innerHTML = `<div class="status-ano status-erro" style="text-align: center;"><div class="status-texto">⚠️ Nenhum registro financeiro encontrado.</div></div>`;
                     return;
                 }
 
                 let htmlContent = '';
                 let totalDevido = 0; 
+                const mesAtual = new Date().getMonth(); // 0 para Janeiro, 4 para Maio...
 
                 ['2025', '2026'].forEach(ano => {
                     const status = (data[ano] || '').toUpperCase();
+                    
                     if (status === '' || status === 'PAGO' || status === 'ISENTO') {
                         htmlContent += `<div class="status-ano status-ok"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Situação Regular ✅</b><br>Tudo Justo e Perfeito neste ano. Nenhum débito.</div></div>`;
                     } else {
-                        htmlContent += `<div class="status-ano status-pendente"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Pendências encontradas ❌</b><br>Meses em aberto: ${status}</div></div>`;
+                        const mesesPendentes = status.split(',').map(m => m.trim());
                         
-                        const mesesDevendo = status.split(',').map(m => m.trim());
-                        const quantidadeMeses = mesesDevendo.length;
-                        totalDevido += (quantidadeMeses * 90);
+                        // Inteligência para 2026 (Verificar meses atrasados vs meses a vencer)
+                        if (ano === '2026') {
+                            let mesesAtrasados = [];
+                            let mesesAVencer = [];
+                            
+                            mesesPendentes.forEach(m => {
+                                if (mapaMeses[m] <= mesAtual) mesesAtrasados.push(m);
+                                else mesesAVencer.push(m);
+                            });
+
+                            if (mesesAtrasados.length === 0) {
+                                // Pagou o mês atual, está regular no momento, mas tem parcelas futuras
+                                htmlContent += `
+                                    <div class="status-ano status-ok">
+                                        <div class="ano-titulo">${ano}</div>
+                                        <div class="status-texto"><b>Situação Regular (Em Dia) ✅</b><br>As mensalidades até o mês atual estão quitadas.</div>
+                                        <div class="meses-vencer">Próximos vencimentos do ano: ${mesesAVencer.join(', ')}</div>
+                                    </div>`;
+                            } else {
+                                // Tem pendências antigas ou do mês atual
+                                htmlContent += `
+                                    <div class="status-ano status-pendente">
+                                        <div class="ano-titulo">${ano}</div>
+                                        <div class="status-texto"><b>Pendências encontradas ❌</b><br>Meses em aberto: ${mesesAtrasados.join(', ')}</div>
+                                        ${mesesAVencer.length > 0 ? `<div class="meses-vencer">Próximos vencimentos do ano: ${mesesAVencer.join(', ')}</div>` : ''}
+                                    </div>`;
+                            }
+                        } else {
+                            // Para 2025 ou outros anos fechados, tudo pendente é atrasado
+                            htmlContent += `<div class="status-ano status-pendente"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Pendências encontradas ❌</b><br>Meses em aberto: ${status}</div></div>`;
+                        }
+
+                        // O Total devido continua somando tudo que está na planilha
+                        totalDevido += (mesesPendentes.length * 90);
                     }
                 });
                 
@@ -320,7 +371,7 @@
                     const valorFormatado = totalDevido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     areaValorTotal.innerHTML = `
                         <div class="caixa-valor-total">
-                            <div class="rotulo">Total Pendente Estimado</div>
+                            <div class="rotulo">Total Pendente Estimado Até DEZ/2026</div>
                             <div class="valor">${valorFormatado}</div>
                         </div>
                     `;
@@ -329,11 +380,11 @@
                 }
 
             } catch (error) {
-                areaResultados.innerHTML = `<div class="status-ano status-erro"><div class="status-texto">⚠️ Falha de comunicação com o sistema da Loja. Tente novamente mais tarde.</div></div>`;
+                areaResultados.innerHTML = `<div class="status-ano status-erro" style="text-align: center;"><div class="status-texto">⚠️ Falha de comunicação com o sistema da Loja. Tente novamente mais tarde.</div></div>`;
             }
         }
 
-        // ================= FUNÇÃO EXTRA: CONVERTER ARQUIVO EM TEXTO (BASE64) =================
+        // Converte arquivo para texto para cruzar a ponte do Google Drive
         function converterParaBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -343,10 +394,7 @@
             });
         }
 
-        // ================= NOVA LÓGICA DE ENVIO DO COMPROVANTE PARA O GOOGLE DRIVE =================
-        btnUploadClick.addEventListener('click', () => {
-            fileInput.click();
-        });
+        btnUploadClick.addEventListener('click', () => { fileInput.click(); });
 
         fileInput.addEventListener('change', async (event) => {
             const arquivo = event.target.files[0];
@@ -354,7 +402,7 @@
 
             const tamanhoMaximoEmBytes = 1 * 1024 * 1024; 
             if (arquivo.size > tamanhoMaximoEmBytes) {
-                alert('Atenção, Amado Irmão: O arquivo é muito pesado! Por favor, envie uma imagem ou PDF menor que 1MB para não sobrecarregar nosso servidor.');
+                alert('Atenção, Amado Irmão: O arquivo é muito pesado! Por favor, envie uma imagem ou PDF menor que 1MB.');
                 fileInput.value = ''; 
                 return; 
             }
@@ -366,12 +414,11 @@
             btnUploadClick.style.opacity = '0.5';
 
             try {
-                // Converte a foto em texto
                 const base64Data = await converterParaBase64(arquivo);
 
                 uploadStatus.innerText = 'Passo 2/3: Enviando para a Nuvem da Loja... ☁️';
                 
-                // Envia para o Google Apps Script
+                // Comunicação com o Apps Script
                 const respostaDrive = await fetch(URL_API_PLANILHAS, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -388,7 +435,6 @@
                 if (resultadoDrive.status === 'success') {
                     uploadStatus.innerText = 'Passo 3/3: Registrando na Tesouraria... 📝';
                     
-                    // Salva o link do Drive no banco de dados Firestore
                     await addDoc(collection(db, 'comprovantes_enviados'), {
                         cim: cimGlobal,
                         dataEnvio: new Date().toISOString(),
