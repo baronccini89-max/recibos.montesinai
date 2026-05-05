@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal do Irmão - Monte Sinai</title>
+    <title>Portal do Amado Irmão - Monte Sinai</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -20,22 +20,34 @@
             padding: 20px;
             text-align: center;
             border-bottom: 4px solid #d4af37;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .logo-img { width: 70px; height: auto; margin-bottom: 10px; }
+        .logo-img { width: 75px; height: auto; margin-bottom: 10px; }
         header h1 { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
-        header p { font-size: 13px; color: #d4af37; font-weight: 600; }
+        header p { font-size: 13px; color: #d4af37; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         
-        .user-info { font-size: 14px; margin-top: 10px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; display: inline-block; }
+        .user-info { font-size: 14px; margin-top: 12px; background: rgba(255,255,255,0.15); padding: 6px 18px; border-radius: 20px; display: inline-block; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3);}
 
         /* Área de Conteúdo */
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
 
+        /* NOVO: Mensagem de Boas Vindas */
+        .welcome-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1a3a7a;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .welcome-box h2 { color: #1a3a7a; font-size: 18px; margin-bottom: 6px; font-weight: 700; }
+        .welcome-box p { font-size: 14px; color: #444; line-height: 1.6; }
+
         .card {
-            background: white; border-radius: 16px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            background: white; border-radius: 16px; padding: 22px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             margin-bottom: 20px; text-align: left;
         }
 
@@ -52,7 +64,7 @@
         .status-pendente { background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; }
         .status-erro { background: #ffebee; border-left: 4px solid #f44336; color: #c62828; }
 
-        /* NOVO: Caixa de Valor Total */
+        /* Caixa de Valor Total */
         .caixa-valor-total {
             background: #ffebee;
             border: 2px solid #ef5350;
@@ -65,32 +77,58 @@
         .caixa-valor-total .rotulo { font-size: 13px; color: #c62828; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
         .caixa-valor-total .valor { font-size: 28px; color: #b71c1c; font-weight: 800; margin-top: 5px;}
 
-        /* NOVO: Estilo para a área do PIX */
+        /* NOVO: Estilo Aprimorado para a área do PIX e Botão Copiar */
         .pix-box {
             background: #f8f9fa;
             border: 2px dashed #d4af37;
             border-radius: 12px;
-            padding: 15px;
+            padding: 20px 15px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
-        .pix-box p { font-size: 13px; color: #444; margin-bottom: 5px; line-height: 1.4;}
+        .pix-box p { font-size: 13px; color: #444; margin-bottom: 8px; line-height: 1.4;}
+        
+        .pix-chave-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
         .pix-chave { 
-            font-size: 18px; 
+            font-size: 20px; 
             font-weight: 700; 
             color: #1a3a7a; 
             background: #e3f2fd; 
-            padding: 8px 15px; 
+            padding: 10px 20px; 
             border-radius: 8px; 
-            display: inline-block;
-            margin-top: 5px;
             letter-spacing: 1px;
+            border: 1px solid #bbdefb;
         }
+        
+        .btn-copiar {
+            background: #1a3a7a;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-copiar:hover { background: #2c5aa0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(26, 58, 122, 0.2); }
 
         /* Botão de Comprovante */
         .upload-section { text-align: center; margin-top: 10px; }
         .btn-upload {
-            width: 100%; padding: 15px; background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%); color: #fff; border: none; border-radius: 12px;
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%); color: #fff; border: none; border-radius: 12px;
             font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s;
             text-transform: uppercase; letter-spacing: 0.5px;
         }
@@ -99,7 +137,7 @@
         .upload-status { margin-top: 15px; font-size: 13px; font-weight: 600; }
 
         .btn-sair {
-            width: 100%; padding: 12px; background: transparent; color: #f44336; border: 2px solid #f44336; border-radius: 12px;
+            width: 100%; padding: 14px; background: transparent; color: #f44336; border: 2px solid #f44336; border-radius: 12px;
             font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 10px; margin-bottom: 30px;
         }
         .btn-sair:hover { background: #f44336; color: white; }
@@ -109,7 +147,7 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white;
             z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a7a; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a7a; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -120,40 +158,48 @@
 
     <div id="telaCarregamento">
         <div class="spinner"></div>
-        <h3 style="color: #1a3a7a;">Autenticando...</h3>
+        <h3 style="color: #1a3a7a;">Verificando Credenciais...</h3>
     </div>
 
     <header>
-        <img src="./logo.png" alt="Logo" class="logo-img">
+        <img src="./logo.png" alt="Logo Monte Sinai" class="logo-img">
         <h1>Loja Monte Sinai nº 371</h1>
-        <p>Portal do Irmão</p>
+        <p>Área Restrita</p>
         <div class="user-info" id="identificacaoIrmao">CIM: Carregando...</div>
     </header>
 
     <div class="container">
         
+        <!-- MENSAGEM DE BOAS VINDAS -->
+        <div class="welcome-box">
+            <h2>Saudações Fraternais, Amado Irmão! 🤝</h2>
+            <p>É uma alegria recebê-lo em nosso portal digital. Que este ambiente seja sempre Justo e Perfeito para mantermos nossa oficina fortalecida. Receba um T.F.A. da tesouraria.</p>
+        </div>
+
         <div class="card">
-            <h2 class="card-title">📊 Sua Situação Financeira</h2>
+            <h2 class="card-title">📊 Pranchada Financeira</h2>
             <div id="areaResultados">
                 <div class="status-ano status-pendente">
-                    <div class="status-texto">Consultando dados na Tesouraria...</div>
+                    <div class="status-texto">Consultando os registros da Tesouraria...</div>
                 </div>
             </div>
-            <!-- Área onde o Total Pendente vai aparecer automaticamente via Javascript -->
             <div id="areaValorTotal"></div>
         </div>
 
-        <!-- NOVO CARTÃO: DADOS PARA PAGAMENTO (PIX) -->
         <div class="card">
-            <h2 class="card-title">💸 Dados para Pagamento</h2>
+            <h2 class="card-title">💸 Depósito no Tronco / Pagamento</h2>
+            
             <div class="pix-box">
-                <p><strong>Augusta e Respeitável Loja Simbólica Monte Sinai</strong></p>
+                <p><strong>Augusta e Respeitável Loja Simbólica Monte Sinai Nº 371</strong></p>
                 <p>Chave PIX (CNPJ):</p>
-                <div class="pix-chave">07.866.461/0001-90</div>
+                <div class="pix-chave-container">
+                    <div class="pix-chave" id="textoChavePix">07.866.461/0001-90</div>
+                    <button class="btn-copiar" id="btnCopiarPix">📋 Copiar Chave</button>
+                </div>
             </div>
             
-            <p style="font-size: 13px; color: #666; margin-bottom: 15px; line-height: 1.5;">
-                Após realizar o pagamento via Pix ou transferência, envie o comprovante por aqui para a conferência da tesouraria.
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px; line-height: 1.5; text-align: justify;">
+                Após realizar o seu depósito via Pix, anexe o comprovante logo abaixo. A tesouraria fará a conferência em breve.
             </p>
             <div class="upload-section">
                 <input type="file" id="arquivoComprovante" accept="image/*,application/pdf" style="display: none;">
@@ -164,7 +210,7 @@
             </div>
         </div>
 
-        <button class="btn-sair" id="btnSair">Sair da Conta</button>
+        <button class="btn-sair" id="btnSair">Sair da Sessão</button>
     </div>
 
     <script type="module">
@@ -199,10 +245,34 @@
         const fileInput = document.getElementById('arquivoComprovante');
         const btnUploadClick = document.getElementById('btnUploadClick');
         const uploadStatus = document.getElementById('uploadStatus');
+        
+        // Elemento do Botão Copiar
+        const btnCopiarPix = document.getElementById('btnCopiarPix');
 
         let cimGlobal = "";
 
-        // Verificação de Segurança
+        // ================= LÓGICA DO BOTÃO COPIAR PIX =================
+        btnCopiarPix.addEventListener('click', () => {
+            const chaveCnpj = "07.866.461/0001-90";
+            
+            navigator.clipboard.writeText(chaveCnpj).then(() => {
+                // Efeito visual de sucesso
+                btnCopiarPix.innerText = '✅ PIX Copiado!';
+                btnCopiarPix.style.background = '#4CAF50';
+                
+                // Volta ao normal depois de 3 segundos
+                setTimeout(() => {
+                    btnCopiarPix.innerText = '📋 Copiar Chave';
+                    btnCopiarPix.style.background = '#1a3a7a';
+                }, 3000);
+            }).catch(err => {
+                console.error('Erro ao copiar a chave', err);
+                alert('Não foi possível copiar automaticamente. Selecione o texto do CNPJ e copie.');
+            });
+        });
+
+
+        // ================= LÓGICA DE SEGURANÇA E CONSULTA =================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 cimGlobal = user.displayName;
@@ -221,7 +291,6 @@
             }
         });
 
-        // Consulta Financeira na Planilha com Cálculo de Dívida
         async function realizarConsultaFinanceira(cim) {
             try {
                 const response = await fetch(`${URL_API_PLANILHAS}?acao=consulta&cim=${cim}`);
@@ -233,16 +302,15 @@
                 }
 
                 let htmlContent = '';
-                let totalDevido = 0; // Inicia o contador de dívidas
+                let totalDevido = 0; 
 
                 ['2025', '2026'].forEach(ano => {
                     const status = (data[ano] || '').toUpperCase();
                     if (status === '' || status === 'PAGO' || status === 'ISENTO') {
-                        htmlContent += `<div class="status-ano status-ok"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Situação Regular ✅</b><br>Não há débitos pendentes neste ano.</div></div>`;
+                        htmlContent += `<div class="status-ano status-ok"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Situação Regular ✅</b><br>Tudo Justo e Perfeito neste ano. Nenhum débito.</div></div>`;
                     } else {
                         htmlContent += `<div class="status-ano status-pendente"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Pendências encontradas ❌</b><br>Meses em aberto: ${status}</div></div>`;
                         
-                        // Lógica para contar os meses e multiplicar pela mensalidade (R$ 90)
                         const mesesDevendo = status.split(',').map(m => m.trim());
                         const quantidadeMeses = mesesDevendo.length;
                         totalDevido += (quantidadeMeses * 90);
@@ -251,7 +319,6 @@
                 
                 areaResultados.innerHTML = htmlContent;
 
-                // Se o irmão dever algo, exibe a caixa de Total
                 if (totalDevido > 0) {
                     const valorFormatado = totalDevido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     areaValorTotal.innerHTML = `
@@ -261,11 +328,11 @@
                         </div>
                     `;
                 } else {
-                    areaValorTotal.innerHTML = ''; // Fica vazio se estiver tudo quite
+                    areaValorTotal.innerHTML = ''; 
                 }
 
             } catch (error) {
-                areaResultados.innerHTML = `<div class="status-ano status-erro"><div class="status-texto">⚠️ Falha de conexão com os servidores da Tesouraria. Tente novamente mais tarde.</div></div>`;
+                areaResultados.innerHTML = `<div class="status-ano status-erro"><div class="status-texto">⚠️ Falha de comunicação com o sistema da Loja. Tente novamente mais tarde.</div></div>`;
             }
         }
 
@@ -278,16 +345,15 @@
             const arquivo = event.target.files[0];
             if(!arquivo) return;
 
-            // TRAVA DE SEGURANÇA: LIMITE DE PESO (1MB)
             const tamanhoMaximoEmBytes = 1 * 1024 * 1024; 
             if (arquivo.size > tamanhoMaximoEmBytes) {
-                alert('Atenção: O arquivo é muito pesado! Por favor, envie uma imagem ou PDF menor que 1MB.');
+                alert('Atenção, Amado Irmão: O arquivo é muito pesado! Por favor, envie uma imagem ou PDF menor que 1MB para não sobrecarregar nosso servidor.');
                 fileInput.value = ''; 
                 return; 
             }
 
             uploadStatus.style.color = '#1a3a7a';
-            uploadStatus.innerText = '⏳ Aguarde. Enviando arquivo para a tesouraria...';
+            uploadStatus.innerText = '⏳ Aguarde. Transmitindo documento para a tesouraria...';
             btnUploadClick.disabled = true;
             btnUploadClick.style.opacity = '0.5';
 
@@ -307,12 +373,12 @@
                 });
 
                 uploadStatus.style.color = '#4CAF50';
-                uploadStatus.innerText = '✅ Comprovante enviado com sucesso!';
+                uploadStatus.innerText = 'Vivat! ✅ Comprovante enviado com sucesso.';
                 
             } catch (erro) {
                 console.error(erro);
                 uploadStatus.style.color = '#f44336';
-                uploadStatus.innerText = '❌ Erro no envio. Tente novamente.';
+                uploadStatus.innerText = '❌ Falha no envio. Tente novamente.';
             } finally {
                 btnUploadClick.disabled = false;
                 btnUploadClick.style.opacity = '1';
