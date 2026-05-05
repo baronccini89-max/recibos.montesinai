@@ -375,6 +375,7 @@
             }
             body * { visibility: hidden; }
             .form-section, h1, .preview-title, .empty-preview, .buttons { display: none !important; }
+            #telaBloqueio { display: none !important; } /* Esconde a cortina na impressão */
 
             html, body, .container {
                 background: white !important;
@@ -421,6 +422,12 @@
     </style>
 </head>
 <body>
+
+    <!-- PASSO 1 DA SEGURANÇA: A CORTINA DE BLOQUEIO -->
+    <div id="telaBloqueio" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f2a5a; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white;">
+        <h2 style="font-weight: 600;">🔒 Verificando Segurança...</h2>
+    </div>
+
     <div class="container">
         <h1>📜 Gerador de Recibos - Loja Monte Sinai</h1>
 
@@ -569,8 +576,10 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        
+        // PASSO 2 DA SEGURANÇA: IMPORTAR O MÓDULO DE AUTENTICAÇÃO
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // 🔥 COLE AQUI SUAS CREDENCIAIS DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
             authDomain: "monte-sinai-recibos.firebaseapp.com",
@@ -582,12 +591,26 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app); // INICIA A FERRAMENTA DE LOGIN
 
         window.db = db;
         window.firestore = { collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc };
 
         console.log('✅ Firebase inicializado com sucesso!');
-        carregarUltimoRecibo();
+        
+        // PASSO 3 DA SEGURANÇA: A REGRA DA PORTA (VERIFICA QUEM ESTÁ LOGADO)
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === 'baronccini89@gmail.com') {
+                // É você! Pode esconder a cortina de segurança e liberar o app
+                document.getElementById('telaBloqueio').style.display = 'none';
+                
+                // Só carrega o último recibo depois de ter certeza que é você
+                carregarUltimoRecibo(); 
+            } else {
+                // Não está logado, ou é outro irmão. Redireciona para o Login sem deixar ver nada!
+                window.location.replace("index.html");
+            }
+        });
     </script>
 
     <script>
@@ -1033,7 +1056,6 @@
                 });
             }
 
-            // --- CÁLCULO AUTOMÁTICO DO VALOR (R$90 por mês) ---
             const campoValor = document.getElementById('valor');
             if (campoValor) {
                 const qtdMeses = mesesSelecionados.length;
