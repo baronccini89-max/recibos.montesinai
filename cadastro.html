@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cadastro - Monte Sinai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 50%, #d4af37 100%);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .login-box {
+            background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px; width: 100%; padding: 40px 30px; text-align: center;
+        }
+        .logo-img { width: 90px; height: auto; object-fit: contain; margin: 0 auto 15px; display: block; }
+        h2 { color: #1a3a7a; font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+        p { color: #666; font-size: 13px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; text-align: left; }
+        label { font-size: 12px; font-weight: 600; color: #1a3a7a; text-transform: uppercase; }
+        input {
+            padding: 14px; border: 2px solid #e8e8e8; border-radius: 12px; font-size: 14px;
+            font-family: inherit; transition: all 0.3s ease; background-color: #f8f9fa; width: 100%;
+        }
+        input:focus { outline: none; border-color: #d4af37; background-color: white; }
+        
+        /* Grid para CIM e PIN ficarem lado a lado */
+        .row-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        button {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%);
+            color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 58, 122, 0.3); }
+        .error-msg { color: #d32f2f; font-size: 13px; margin-top: 15px; font-weight: 600; display: none; }
+        .rodape { margin-top: 20px; font-size: 14px; }
+        .rodape a { color: #1a3a7a; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <img src="./logo.png" alt="Logo Monte Sinai" class="logo-img">
+        <h2>Criar Conta</h2>
+        <p>Informe seus dados e a chave de segurança</p>
+
+        <div class="form-group">
+            <div>
+                <label>E-mail</label>
+                <input type="email" id="emailInput" placeholder="Seu melhor e-mail">
+            </div>
+            <div>
+                <label>Criar Senha</label>
+                <input type="password" id="senhaInput" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="row-inputs">
+                <div>
+                    <label>Seu CIM</label>
+                    <input type="number" id="cimInput" placeholder="Ex: 12345">
+                </div>
+                <div>
+                    <label>PIN da Loja</label>
+                    <input type="number" id="pinInput" placeholder="4 dígitos">
+                </div>
+            </div>
+        </div>
+
+        <button id="btnCadastrar">Validar e Cadastrar</button>
+        <div id="errorMsg" class="error-msg">Mensagem de erro</div>
+
+        <div class="rodape">
+            <a href="index.html">Já tem conta? Voltar ao Login</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Credenciais do Firebase da Loja
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // A sua URL da API já configurada aqui
+        const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
+
+        const btnCadastrar = document.getElementById('btnCadastrar');
+        const errorMsg = document.getElementById('errorMsg');
+
+        btnCadastrar.addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const senha = document.getElementById('senhaInput').value.trim();
+            const cim = document.getElementById('cimInput').value.trim();
+            const pin = document.getElementById('pinInput').value.trim();
+
+            if(!email || !senha || !cim || !pin) {
+                mostrarErro('Preencha todos os campos.');
+                return;
+            }
+
+            if(senha.length < 6) {
+                mostrarErro('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            btnCadastrar.innerText = 'Validando Segurança...';
+            errorMsg.style.display = 'none';
+
+            try {
+                // 1. Pergunta para a API se o PIN bate com o CIM na Planilha
+                const response = await fetch(`${URL_API_PLANILHAS}?acao=validar_pin&cim=${cim}&pin=${pin}`);
+                const data = await response.json();
+
+                if(data.valido === true) {
+                    btnCadastrar.innerText = 'Criando Conta...';
+                    
+                    // 2. Cria a conta no Firebase
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                    const user = userCredential.user;
+
+                    // 3. Salva o CIM permanentemente no perfil do usuário
+                    await updateProfile(user, {
+                        displayName: cim
+                    });
+
+                    alert('Conta criada com sucesso! O seu CIM foi vinculado de forma segura.');
+                    
+                    // Redireciona de volta para a tela de login
+                    window.location.href = "index.html";
+
+                } else {
+                    mostrarErro('CIM ou PIN inválidos. Procure a tesouraria.');
+                    btnCadastrar.innerText = 'Validar e Cadastrar';
+                }
+
+            } catch (error) {
+                console.error(error);
+                if(error.code === 'auth/email-already-in-use') {
+                    mostrarErro('Este e-mail já está cadastrado.');
+                } else {
+                    mostrarErro('Erro de conexão. Tente novamente.');
+                }
+                btnCadastrar.innerText = 'Validar e Cadastrar';
+            }
+        });
+
+        function mostrarErro(mensagem) {
+            errorMsg.innerText = mensagem;
+            errorMsg.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
