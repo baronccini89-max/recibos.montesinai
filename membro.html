@@ -29,7 +29,6 @@
         header h1 { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
         header p { font-size: 13px; color: #d4af37; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         
-        /* Modificado para caber o nome do irmão elegantemente */
         .user-info { font-size: 14px; margin-top: 12px; background: rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 20px; display: inline-block; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3); max-width: 90%; word-wrap: break-word;}
 
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
@@ -53,13 +52,13 @@
 
         .card-title { color: #1a3a7a; font-size: 16px; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;}
 
-        /* Informação da Mensalidade */
+        /* Informação da Mensalidade (Movida para o cartão inferior) */
         .info-mensalidade {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 13px;
             color: #555;
             text-align: center;
@@ -158,11 +157,6 @@
         <div class="card">
             <h2 class="card-title">📊 Pranchada Financeira</h2>
             
-            <div class="info-mensalidade">
-                Valor atual da mensalidade: <strong>R$ 90,00</strong><br>
-                <span style="font-size: 11px; color: #888;" id="dataAtualizacao"></span>
-            </div>
-
             <div id="areaResultados">
                 <div class="status-ano status-pendente" style="text-align: center;">
                     <div class="status-texto">Consultando os registros da Tesouraria...</div>
@@ -172,7 +166,12 @@
         </div>
 
         <div class="card">
-            <h2 class="card-title">💸 Depósito no Tronco / Pagamento</h2>
+            <h2 class="card-title">💸 Chave PIX para pagamento</h2>
+            
+            <div class="info-mensalidade">
+                Valor atual da mensalidade: <strong>R$ 90,00</strong><br>
+                <span style="font-size: 11px; color: #888;" id="dataAtualizacao"></span>
+            </div>
             
             <div class="pix-box">
                 <p><strong>Augusta e Respeitável Loja Simbólica Monte Sinai Nº 371</strong></p>
@@ -216,12 +215,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // =========================================================================================
-        // ATENÇÃO: COLOQUE A SUA URL DO GOOGLE APPS SCRIPT ABAIXO!
-        // =========================================================================================
         const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
 
-        // Lista de Irmãos para identificar o nome pelo CIM
         const cadastroPagadores = [
             { nome: "Adriano Locateli Da Rosa", cim: "27529" }, { nome: "Agnelo Francisco Chiodo", cim: "19337" },
             { nome: "Alexandre Coimbra Martins", cim: "27530" }, { nome: "Celso Jose Costatulio Da Silva Esteves", cim: "10967" },
@@ -263,11 +258,9 @@
 
         let cimGlobal = "";
 
-        // Preenche a data de hoje formatada
         const hoje = new Date();
         dataAtualizacao.innerText = `Data de referência: ${hoje.toLocaleDateString('pt-BR')}`;
 
-        // Mapa para a inteligência dos meses
         const mapaMeses = { 'JAN': 0, 'FEV': 1, 'MAR': 2, 'ABR': 3, 'MAI': 4, 'JUN': 5, 'JUL': 6, 'AGO': 7, 'SET': 8, 'OUT': 9, 'NOV': 10, 'DEZ': 11 };
 
         btnCopiarPix.addEventListener('click', () => {
@@ -294,7 +287,6 @@
                     return;
                 }
 
-                // Identifica o nome do Irmão
                 const irmaoLogado = cadastroPagadores.find(p => p.cim === cimGlobal);
                 const nomeExibicao = irmaoLogado ? irmaoLogado.nome : "Amado Irmão";
                 identificacaoIrmao.innerText = `${nomeExibicao} (CIM: ${cimGlobal})`;
@@ -318,7 +310,7 @@
 
                 let htmlContent = '';
                 let totalDevido = 0; 
-                const mesAtual = new Date().getMonth(); // 0 para Janeiro, 4 para Maio...
+                const mesAtual = new Date().getMonth(); 
 
                 ['2025', '2026'].forEach(ano => {
                     const status = (data[ano] || '').toUpperCase();
@@ -328,7 +320,6 @@
                     } else {
                         const mesesPendentes = status.split(',').map(m => m.trim());
                         
-                        // Inteligência para 2026 (Verificar meses atrasados vs meses a vencer)
                         if (ano === '2026') {
                             let mesesAtrasados = [];
                             let mesesAVencer = [];
@@ -339,7 +330,6 @@
                             });
 
                             if (mesesAtrasados.length === 0) {
-                                // Pagou o mês atual, está regular no momento, mas tem parcelas futuras
                                 htmlContent += `
                                     <div class="status-ano status-ok">
                                         <div class="ano-titulo">${ano}</div>
@@ -347,7 +337,6 @@
                                         <div class="meses-vencer">Próximos vencimentos do ano: ${mesesAVencer.join(', ')}</div>
                                     </div>`;
                             } else {
-                                // Tem pendências antigas ou do mês atual
                                 htmlContent += `
                                     <div class="status-ano status-pendente">
                                         <div class="ano-titulo">${ano}</div>
@@ -356,11 +345,9 @@
                                     </div>`;
                             }
                         } else {
-                            // Para 2025 ou outros anos fechados, tudo pendente é atrasado
                             htmlContent += `<div class="status-ano status-pendente"><div class="ano-titulo">${ano}</div><div class="status-texto"><b>Pendências encontradas ❌</b><br>Meses em aberto: ${status}</div></div>`;
                         }
 
-                        // O Total devido continua somando tudo que está na planilha
                         totalDevido += (mesesPendentes.length * 90);
                     }
                 });
@@ -384,7 +371,6 @@
             }
         }
 
-        // Converte arquivo para texto para cruzar a ponte do Google Drive
         function converterParaBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -418,7 +404,6 @@
 
                 uploadStatus.innerText = 'Passo 2/3: Enviando para a Nuvem da Loja... ☁️';
                 
-                // Comunicação com o Apps Script
                 const respostaDrive = await fetch(URL_API_PLANILHAS, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
