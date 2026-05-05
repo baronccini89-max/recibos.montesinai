@@ -8,7 +8,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f4f7f6; color: #333; }
         
-        /* Cabeçalho */
         header { background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 100%); color: white; padding: 20px; text-align: center; border-bottom: 4px solid #d4af37; }
         .logo-img { width: 60px; height: auto; margin-bottom: 10px; }
         header h1 { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
@@ -16,7 +15,6 @@
 
         .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
 
-        /* Estilos da Tabela e Painel */
         .painel-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
         .painel-titulo { color: #1a3a7a; font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
 
@@ -25,7 +23,6 @@
         td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
         tr:hover { background: #fcfcfc; }
 
-        /* Semáforo (Cores e Badges) */
         .badge { padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-block; text-align: center; min-width: 100px; }
         .badge-verde { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .badge-amarelo { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
@@ -73,7 +70,6 @@
                     </tr>
                 </thead>
                 <tbody id="corpoTabela">
-                    <!-- Linhas geradas automaticamente pelo JavaScript -->
                 </tbody>
             </table>
         </div>
@@ -83,7 +79,6 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // Suas credenciais do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
             authDomain: "monte-sinai-recibos.firebaseapp.com",
@@ -97,7 +92,7 @@
         const auth = getAuth(app);
 
         // =====================================================================
-        // COLE SUA URL DA API DO GOOGLE APPS SCRIPT AQUI ABAIXO
+        // COLE SUA URL DA API AQUI
         // =====================================================================
         const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
 
@@ -106,22 +101,18 @@
         const carregando = document.getElementById('carregando');
         const btnSair = document.getElementById('btnSair');
 
-        // 1. Lógica de Segurança Restrita ao Tesoureiro
+        // Lógica de Segurança Restrita (Tesoureiro OU Venerável)
         onAuthStateChanged(auth, (user) => {
-            // Verifica se o usuário está logado E se o e-mail é o do administrador
-            if (user && user.email === 'baronccini89@gmail.com') {
+            if (user && (user.email === 'baronccini89@gmail.com' || user.email === 'sergioedsonh@yahoo.com.br')) {
                 carregarListaMembros();
             } else if (user) {
-                // Se for outro irmão tentando espiar, expulsa para a tela de membro
                 alert('Acesso negado. Esta área é restrita à Gestão Master.');
                 window.location.replace("membro.html");
             } else {
-                // Se não estiver logado, manda para o login
                 window.location.replace("index.html");
             }
         });
 
-        // 2. Busca a lista completa na Planilha
         async function carregarListaMembros() {
             try {
                 const response = await fetch(`${URL_API_PLANILHAS}?acao=listar_todos`);
@@ -131,48 +122,37 @@
                     carregando.innerHTML = "Erro ao carregar dados da planilha.";
                     return;
                 }
-
                 gerarTabela(membros);
-
             } catch (error) {
                 carregando.innerHTML = "Falha de conexão com os servidores.";
             }
         }
 
-        // 3. Monta a tabela e aplica a inteligência do Semáforo
         function gerarTabela(membros) {
             let html = '';
-            const mesAtual = new Date().getMonth(); // Maio = 4
+            const mesAtual = new Date().getMonth();
             const mapaMeses = { 'JAN': 0, 'FEV': 1, 'MAR': 2, 'ABR': 3, 'MAI': 4, 'JUN': 5, 'JUL': 6, 'AGO': 7, 'SET': 8, 'OUT': 9, 'NOV': 10, 'DEZ': 11 };
 
             membros.forEach(membro => {
                 let atrasosCount = 0;
                 let detalheAtraso = [];
 
-                // Conta atrasos de 2025 (Ano fechado, qualquer pendência é atraso)
                 const status2025 = membro.p2025.toUpperCase();
                 if (status2025 && status2025 !== 'PAGO' && status2025 !== 'ISENTO') {
                     const meses25 = status2025.split(',').map(m => m.trim());
                     atrasosCount += meses25.length;
                 }
 
-                // Conta atrasos de 2026 (Compara os meses em aberto com o mês atual)
                 const status2026 = membro.p2026.toUpperCase();
                 if (status2026 && status2026 !== 'PAGO' && status2026 !== 'ISENTO') {
                     const meses26 = status2026.split(',').map(m => m.trim());
                     let atrasosNesteAno = 0;
-                    
                     meses26.forEach(m => {
-                        // Se o mês em aberto for menor ou igual ao mês atual, é dívida real
-                        if (mapaMeses[m] <= mesAtual) { 
-                            atrasosNesteAno++; 
-                        }
+                        if (mapaMeses[m] <= mesAtual) { atrasosNesteAno++; }
                     });
-                    
                     atrasosCount += atrasosNesteAno;
                 }
 
-                // 4. Define as cores e o botão baseado na regra de negócios
                 let corSemaforo = '';
                 let textoSemaforo = '';
                 let botaoNotificar = `<button class="btn-acao btn-desativado" disabled>Sem ação</button>`;
@@ -186,7 +166,6 @@
                 } else {
                     corSemaforo = 'badge-vermelho';
                     textoSemaforo = 'Inadimplente';
-                    // Libera o botão apenas para quem tem 6 ou mais atrasos
                     botaoNotificar = `<button class="btn-acao" onclick="alert('Funcionalidade de alerta via Telegram será ativada na próxima etapa do projeto.')">Aprovar Envio</button>`;
                 }
 
@@ -210,7 +189,6 @@
             tabelaMembros.style.display = 'table';
         }
 
-        // Função de Logout
         btnSair.addEventListener('click', () => {
             signOut(auth).then(() => { window.location.replace("index.html"); });
         });
