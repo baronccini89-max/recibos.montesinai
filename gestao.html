@@ -174,10 +174,9 @@
         let dadosGlobais = [];
         let ordemAtual = { coluna: 'nome', crescente: true };
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.email === 'baronccini89@gmail.com') {
-                carregarDadosDaPlanilha();
-            if (user && user.email === 'sergioedsonh@yahoo.com.br') {
+            onAuthStateChanged(auth, (user) => {
+            // Verifica se o utilizador está logado e se é o Tesoureiro OU o Venerável Mestre
+            if (user && (user.email === 'baronccini89@gmail.com' || user.email === 'sergioedsonh@yahoo.com.br')) {
                 carregarDadosDaPlanilha();
             } else if (user) {
                 alert('Acesso negado. Esta área é restrita à Gestão Master.');
