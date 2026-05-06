@@ -135,82 +135,87 @@
         </div>
     </div>
 
-    <!-- Importação dos módulos de Autenticação do Firebase -->
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-    // 1. Configuração do Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
-        authDomain: "monte-sinai-recibos.firebaseapp.com",
-        projectId: "monte-sinai-recibos",
-        storageBucket: "monte-sinai-recibos.firebasestorage.app",
-        messagingSenderId: "880791367597",
-        appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
-    };
+        // 1. Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    // 2. O "Olheiro" Automático: Controla os destinos
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const emailLogado = user.email.toLowerCase().trim();
-            
-            // Regra Master: Lucas e Sergio vão para o Portal
-            if (emailLogado === 'baronccini89@gmail.com' || emailLogado === 'sergioedsonh@yahoo.com.br') {
-                window.location.replace("portal.html");
-            } else {
-                window.location.replace("membro.html");
+        // 2. O "Olheiro" Automático: Controla os destinos
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const emailLogado = user.email.toLowerCase().trim();
+                
+                // Regra Master: Lucas e Sergio vão para o Portal
+                if (emailLogado === 'baronccini89@gmail.com' || emailLogado === 'sergioedsonh@yahoo.com.br') {
+                    window.location.replace("portal.html");
+                } else {
+                    window.location.replace("membro.html");
+                }
             }
-        }
-    });
-
-    // 3. Captura dos elementos exatos da tela
-    const emailInput = document.getElementById('email');
-    const pinInput = document.getElementById('pin');
-    const btnAceder = document.querySelector('button'); // Pega o botão da sua tela
-
-    // 4. A Função de Login Inteligente
-    function fazerLogin() {
-        const email = emailInput.value.trim();
-        const pin = pinInput.value.trim();
-
-        if (!email || !pin) {
-            alert("Amado Irmão, por favor preencha o E-mail e o PIN.");
-            return;
-        }
-
-        const textoOriginal = btnAceder.innerText;
-        btnAceder.innerText = "Verificando...";
-        btnAceder.disabled = true;
-
-        signInWithEmailAndPassword(auth, email, pin)
-            .catch((error) => {
-                console.error("Erro no login:", error);
-                alert("Erro ao aceder: Verifique se o e-mail e o PIN estão corretos.");
-                btnAceder.innerText = textoOriginal;
-                btnAceder.disabled = false;
-            });
-    }
-
-    // 5. Ativando o Gatilho do Botão e da Tecla Enter
-    if (btnAceder) {
-        btnAceder.addEventListener('click', (e) => {
-            e.preventDefault(); // Impede a página de recarregar sozinha
-            fazerLogin();
         });
-    }
 
-    if (pinInput) {
-        pinInput.addEventListener('keypress', (e) => {
+        // 3. Captura dos elementos exatos do seu HTML original
+        const emailInput = document.getElementById('emailInput');
+        const senhaInput = document.getElementById('senhaInput');
+        const btnEntrar = document.getElementById('btnEntrar');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // 4. A Função de Login Inteligente
+        function fazerLogin() {
+            const email = emailInput.value.trim();
+            const senha = senhaInput.value.trim();
+
+            if (!email || !senha) {
+                alert("Amado Irmão, por favor preencha o E-mail e a Senha.");
+                return;
+            }
+
+            // Oculta a mensagem de erro antiga e altera o botão
+            errorMsg.style.display = 'none';
+            const textoOriginal = btnEntrar.innerText;
+            btnEntrar.innerText = "Verificando...";
+            btnEntrar.disabled = true;
+
+            signInWithEmailAndPassword(auth, email, senha)
+                .catch((error) => {
+                    console.error("Erro no login:", error);
+                    // Mostra a sua mensagem de erro vermelha elegante
+                    errorMsg.style.display = 'block';
+                    btnEntrar.innerText = textoOriginal;
+                    btnEntrar.disabled = false;
+                });
+        }
+
+        // 5. Ativando o Gatilho do Botão e da Tecla Enter
+        if (btnEntrar) {
+            btnEntrar.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                fazerLogin();
+            });
+        }
+
+        // Se o irmão apertar Enter no campo de email ou de senha, faz login
+        const acionarComEnter = (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 fazerLogin();
             }
-        });
-    }
-</script>
+        };
+
+        if (emailInput) emailInput.addEventListener('keypress', acionarComEnter);
+        if (senhaInput) senhaInput.addEventListener('keypress', acionarComEnter);
+    </script>
 </body>
 </html>
