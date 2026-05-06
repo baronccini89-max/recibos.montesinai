@@ -15,17 +15,19 @@
 
         .container { padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
 
-        /* Estilo do Dashboard (Cards de Resumo) */
         .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .dash-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #1a3a7a; }
         .dash-card.verde { border-left-color: #2e7d32; }
+        .dash-card.amarelo { border-left-color: #f57f17; }
         .dash-card.vermelho { border-left-color: #c62828; }
         .dash-title { font-size: 13px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; }
         .dash-number { font-size: 32px; font-weight: 800; color: #1a3a7a; }
 
         .controles-tabela { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         
-        .filtro-container { display: flex; align-items: center; gap: 10px; }
+        .filtro-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .input-busca { padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .input-busca:focus { border-color: #1a3a7a; }
         .filtro-container select { padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Poppins', sans-serif; font-size: 14px; color: #333; outline: none; background: white; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         
         .botoes-acao { display: flex; gap: 10px; }
@@ -39,7 +41,11 @@
 
         table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
         thead { background: #f8f9fa; border-bottom: 2px solid #e0e0e0; }
-        th { padding: 15px 20px; color: #1a3a7a; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Classe para permitir o clique nos cabeçalhos */
+        th.ordenavel { padding: 15px 20px; color: #1a3a7a; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; transition: background 0.2s; }
+        th.ordenavel:hover { background: #e2e8f0; }
+        
         td { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; color: #444; }
         tr:hover { background: #fcfcfc; }
 
@@ -48,12 +54,14 @@
         .badge-amarelo { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
         .badge-vermelho { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
-        .info-pendencia { font-size: 12px; color: #666; margin-top: 5px; display: block; font-weight: 500; }
-        .texto-em-dia { color: #2e7d32; font-weight: 600; }
+        .info-pendencia { font-size: 13px; color: #444; margin-top: 5px; display: block; line-height: 1.5; }
+        
+        .btn-acao { background: #d4af37; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-acao:hover { background: #b8962e; }
+        .btn-desativado { background: #e0e0e0; color: #999; cursor: not-allowed; }
 
         #carregando { text-align: center; padding: 60px; color: #1a3a7a; font-weight: 600; font-size: 16px; }
         
-        /* Regras do PDF (Ativadas na Impressão) */
         @media print {
             body { background: white; margin: 0; padding: 0; }
             header, .dashboard, .controles-tabela { display: none !important; }
@@ -65,16 +73,8 @@
             .badge-verde { color: #2e7d32 !important; }
             .badge-amarelo { color: #f57f17 !important; }
             .badge-vermelho { color: #c62828 !important; }
-            /* Título especial para o PDF */
-            .painel-card::before {
-                content: "Relatório de Inadimplência - Loja Monte Sinai Nº 371";
-                display: block;
-                font-size: 20px;
-                font-weight: bold;
-                text-align: center;
-                margin-bottom: 20px;
-                color: #000;
-            }
+            .acao-col { display: none; }
+            .painel-card::before { content: "Relatório Financeiro - Loja Monte Sinai Nº 371"; display: block; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; color: #000; }
         }
     </style>
 </head>
@@ -88,7 +88,6 @@
 
     <div class="container">
         
-        <!-- Novo Dashboard -->
         <div class="dashboard" id="areaDashboard" style="display: none;">
             <div class="dash-card">
                 <div class="dash-title">Total de Irmãos</div>
@@ -110,12 +109,12 @@
 
         <div class="controles-tabela">
             <div class="filtro-container">
-                <label style="font-size: 14px; font-weight: 600; color: #555;">Filtrar por Status:</label>
-                <select id="filtroStatus" onchange="window.filtrarTabela()">
-                    <option value="TODOS">Todos os Irmãos</option>
-                    <option value="REGULAR">Apenas Regulares (Verde)</option>
-                    <option value="ATENCAO">Atenção (Amarelo)</option>
-                    <option value="INADIMPLENTE">Inadimplentes (Vermelho)</option>
+                <input type="text" id="buscaNome" placeholder="🔍 Buscar por nome..." onkeyup="window.aplicarFiltros()" class="input-busca">
+                <select id="filtroMeses" onchange="window.aplicarFiltros()">
+                    <option value="TODOS">Todos os Status</option>
+                    <option value="0">0 meses pendentes (Em Dia)</option>
+                    <option value="1-5">1 a 5 meses de atraso</option>
+                    <option value="6+">6 ou mais meses de atraso</option>
                 </select>
             </div>
             <div class="botoes-acao">
@@ -125,16 +124,17 @@
         </div>
 
         <div class="painel-card">
-            <div id="carregando">Sincronizando pranchada financeira com a secretaria... ⏳</div>
+            <div id="carregando">Sincronizando pranchada financeira... ⏳</div>
 
             <div style="overflow-x: auto;">
                 <table id="tabelaMembros" style="display: none;">
                     <thead>
                         <tr>
-                            <th>Nome do Irmão</th>
-                            <th>CIM</th>
-                            <th>Situação Atual</th>
+                            <th class="ordenavel" onclick="window.ordenarTabela('nome')" title="Clique para ordenar">Nome do Irmão ↕️</th>
+                            <th class="ordenavel" onclick="window.ordenarTabela('cim')" title="Clique para ordenar">CIM ↕️</th>
+                            <th class="ordenavel" onclick="window.ordenarTabela('atrasos')" title="Clique para ordenar">Situação Atual ↕️</th>
                             <th>Detalhes Financeiros</th>
+                            <th class="acao-col">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="corpoTabela">
@@ -160,7 +160,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Mantém a mesma URL
+        // A URL PERMANECE A MESMA
         const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
 
         const corpoTabela = document.getElementById('corpoTabela');
@@ -169,12 +169,13 @@
         const btnSair = document.getElementById('btnSair');
         const areaDashboard = document.getElementById('areaDashboard');
 
-        // Nomes dos meses para a inteligência visual
-        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        // Variáveis globais para controlar a ordenação e os dados
+        let dadosGlobais = [];
+        let ordemAtual = { coluna: 'nome', crescente: true };
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === 'baronccini89@gmail.com') {
-                carregarListaMembros();
+                carregarDadosDaPlanilha();
             } else if (user) {
                 alert('Acesso negado. Esta área é restrita à Gestão Master.');
                 window.location.replace("membro.html");
@@ -183,123 +184,202 @@
             }
         });
 
-        async function carregarListaMembros() {
+        async function carregarDadosDaPlanilha() {
             try {
                 const response = await fetch(`${URL_API_PLANILHAS}?acao=listar_todos`);
-                const membros = await response.json();
+                const membrosAPI = await response.json();
                 
-                if(membros.error) {
+                if(membrosAPI.error) {
                     carregando.innerHTML = "Erro ao carregar dados da planilha.";
                     return;
                 }
-                gerarTabelaEDashboard(membros);
+                
+                // Processa a inteligência dos dados apenas uma vez
+                dadosGlobais = processarDados(membrosAPI);
+                
+                // Atualiza o quadro resumo superior
+                atualizarDashboard();
+                
+                // Ordenação padrão inicial e renderização
+                window.ordenarTabela('nome');
+
             } catch (error) {
                 carregando.innerHTML = "Falha de conexão com os servidores.";
             }
         }
 
-        function gerarTabelaEDashboard(membros) {
-            let html = '';
-            
+        // Função responsável por calcular a situação real baseada no mês atual
+        function processarDados(membrosAPI) {
             const dataAtual = new Date();
             const mesAtual = dataAtual.getMonth();
-            const anoAtual = dataAtual.getFullYear();
-            const nomeMesAtual = nomesMeses[mesAtual];
-
             const mapaMeses = { 'JAN': 0, 'FEV': 1, 'MAR': 2, 'ABR': 3, 'MAI': 4, 'JUN': 5, 'JUL': 6, 'AGO': 7, 'SET': 8, 'OUT': 9, 'NOV': 10, 'DEZ': 11 };
 
-            let contRegulares = 0;
-            let contAtencao = 0;
-            let contInadimplentes = 0;
+            return membrosAPI.map(m => {
+                let txt25 = m.p2025 ? m.p2025.toString().trim() : "";
+                let txt26 = m.p2026 ? m.p2026.toString().trim() : "";
 
-            membros.forEach(membro => {
-                let atrasosCount = 0;
-                let listaMesesAtrasados = [];
+                let arr25 = (txt25 && txt25.toUpperCase() !== 'PAGO' && txt25.toUpperCase() !== 'ISENTO') ? txt25.split(',').map(x => x.trim()) : [];
+                let arr26 = (txt26 && txt26.toUpperCase() !== 'PAGO' && txt26.toUpperCase() !== 'ISENTO') ? txt26.split(',').map(x => x.trim()) : [];
+                
+                // O cálculo de atrasos é feito somando todos os passados/atuais
+                let atrasosCalculados = arr25.length;
+                arr26.forEach(mes => {
+                    if (mapaMeses[mes] <= mesAtual) { atrasosCalculados++; }
+                });
 
-                const status2025 = membro.p2025.toUpperCase();
-                if (status2025 && status2025 !== 'PAGO' && status2025 !== 'ISENTO') {
-                    const array25 = status2025.split(',').map(m => m.trim());
-                    atrasosCount += array25.length;
-                    listaMesesAtrasados.push(`2025: ${status2025}`);
+                // Define o grupo para o filtro
+                let grupoAtraso = '0';
+                if (atrasosCalculados >= 1 && atrasosCalculados <= 5) grupoAtraso = '1-5';
+                else if (atrasosCalculados >= 6) grupoAtraso = '6+';
+
+                return {
+                    ...m,
+                    textoExato2025: txt25,
+                    textoExato2026: txt26,
+                    atrasosCalculados: atrasosCalculados,
+                    grupoAtraso: grupoAtraso
+                };
+            });
+        }
+
+        function atualizarDashboard() {
+            let contRegulares = 0, contAtencao = 0, contInadimplentes = 0;
+            
+            dadosGlobais.forEach(m => {
+                if (m.grupoAtraso === '0') contRegulares++;
+                else if (m.grupoAtraso === '1-5') contAtencao++;
+                else contInadimplentes++;
+            });
+
+            document.getElementById('dashTotal').innerText = dadosGlobais.length;
+            document.getElementById('dashRegulares').innerText = contRegulares;
+            document.getElementById('dashAtencao').innerText = contAtencao;
+            document.getElementById('dashInadimplentes').innerText = contInadimplentes;
+            
+            areaDashboard.style.display = 'grid';
+        }
+
+        // Nova inteligência: Ordenar Tabela
+        window.ordenarTabela = function(colunaClicada) {
+            if (ordemAtual.coluna === colunaClicada) {
+                ordemAtual.crescente = !ordemAtual.crescente;
+            } else {
+                ordemAtual.coluna = colunaClicada;
+                ordemAtual.crescente = true;
+            }
+
+            dadosGlobais.sort((a, b) => {
+                let valorA, valorB;
+                
+                if (colunaClicada === 'nome') { 
+                    valorA = a.nome.toLowerCase(); valorB = b.nome.toLowerCase(); 
                 }
-
-                const status2026 = membro.p2026.toUpperCase();
-                if (status2026 && status2026 !== 'PAGO' && status2026 !== 'ISENTO') {
-                    const array26 = status2026.split(',').map(m => m.trim());
-                    let mesesAtrasados26 = [];
-                    array26.forEach(m => {
-                        if (mapaMeses[m] <= mesAtual) { 
-                            atrasosCount++; 
-                            mesesAtrasados26.push(m);
-                        }
-                    });
-                    if(mesesAtrasados26.length > 0) {
-                        listaMesesAtrasados.push(`2026: ${mesesAtrasados26.join(', ')}`);
-                    }
+                else if (colunaClicada === 'cim') { 
+                    valorA = parseInt(a.cim) || 0; valorB = parseInt(b.cim) || 0; 
                 }
+                else if (colunaClicada === 'atrasos') { 
+                    valorA = a.atrasosCalculados; valorB = b.atrasosCalculados; 
+                }
+                
+                if (valorA < valorB) return ordemAtual.crescente ? -1 : 1;
+                if (valorA > valorB) return ordemAtual.crescente ? 1 : -1;
+                return 0;
+            });
 
+            window.aplicarFiltros();
+        };
+
+        // Nova inteligência: Filtros combinados (Nome + Status)
+        window.aplicarFiltros = function() {
+            const termoBusca = document.getElementById('buscaNome').value.toLowerCase();
+            const filtroMeses = document.getElementById('filtroMeses').value;
+
+            const dadosFiltrados = dadosGlobais.filter(m => {
+                const bateNome = m.nome.toLowerCase().includes(termoBusca);
+                const bateFiltro = (filtroMeses === 'TODOS') || (m.grupoAtraso === filtroMeses);
+                return bateNome && bateFiltro;
+            });
+
+            desenharHTMLTabela(dadosFiltrados);
+        };
+
+        // Responsável unicamente por colocar os dados no ecrã de forma exata
+        function desenharHTMLTabela(dadosParaExibir) {
+            let html = '';
+
+            dadosParaExibir.forEach(membro => {
                 let corSemaforo = '';
                 let textoSemaforo = '';
-                let textoDetalhe = '';
-                let idFiltro = '';
+                let botaoNotificar = `<button class="btn-acao btn-desativado" disabled>Sem ação</button>`;
 
-                if (atrasosCount === 0) {
-                    corSemaforo = 'badge-verde';
+                if (membro.atrasosCalculados === 0) {
+                    corSemaforo = 'badge-verde'; 
                     textoSemaforo = 'Regular';
-                    idFiltro = 'REGULAR';
-                    textoDetalhe = `<span class="info-pendencia texto-em-dia">Em dia até ${nomeMesAtual} de ${anoAtual}</span>`;
-                    contRegulares++;
-                } else if (atrasosCount >= 1 && atrasosCount <= 5) {
-                    corSemaforo = 'badge-amarelo';
+                } else if (membro.atrasosCalculados >= 1 && membro.atrasosCalculados <= 5) {
+                    corSemaforo = 'badge-amarelo'; 
                     textoSemaforo = 'Atenção';
-                    idFiltro = 'ATENCAO';
-                    textoDetalhe = `<span class="info-pendencia"><b>${atrasosCount} meses pendentes:</b><br>${listaMesesAtrasados.join('<br>')}</span>`;
-                    contAtencao++;
                 } else {
-                    corSemaforo = 'badge-vermelho';
+                    corSemaforo = 'badge-vermelho'; 
                     textoSemaforo = 'Inadimplente';
-                    idFiltro = 'INADIMPLENTE';
-                    textoDetalhe = `<span class="info-pendencia" style="color:#c62828;"><b>${atrasosCount} meses pendentes:</b><br>${listaMesesAtrasados.join('<br>')}</span>`;
-                    contInadimplentes++;
+                    botaoNotificar = `<button class="btn-acao" onclick="window.dispararTelegram('${membro.nome}', '${membro.cim}', this)">Aprovar Envio</button>`;
                 }
 
-                // O atributo data-status ajuda o filtro a esconder as linhas corretas
+                // CORREÇÃO CRÍTICA: O texto agora reflete 100% a planilha
+                let textoExibicao25 = membro.textoExato2025 === "" ? "PAGO" : membro.textoExato2025;
+                let textoExibicao26 = membro.textoExato2026 === "" ? "PAGO" : membro.textoExato2026;
+                
+                // Tratamento especial para isenção total
+                if(membro.textoExato2025.toUpperCase() === 'ISENTO' && membro.textoExato2026.toUpperCase() === 'ISENTO') {
+                    textoExibicao25 = "ISENTO"; 
+                    textoExibicao26 = "ISENTO";
+                }
+
+                let detalheHTML = `<span class="info-pendencia"><b>2025:</b> ${textoExibicao25}<br><b>2026:</b> ${textoExibicao26}</span>`;
+
                 html += `
-                    <tr data-status="${idFiltro}">
+                    <tr>
                         <td><strong>${membro.nome}</strong></td>
                         <td>${membro.cim}</td>
-                        <td><div class="badge ${corSemaforo}">${textoSemaforo}</div></td>
-                        <td>${textoDetalhe}</td>
+                        <td>
+                            <div class="badge ${corSemaforo}">${textoSemaforo}</div><br>
+                            <span style="font-size:11px; color:#888; font-weight: 600;">(${membro.atrasosCalculados} atrasos reais)</span>
+                        </td>
+                        <td>${detalheHTML}</td>
+                        <td class="acao-col">${botaoNotificar}</td>
                     </tr>
                 `;
             });
 
-            // Atualiza os números do Dashboard
-            document.getElementById('dashTotal').innerText = membros.length;
-            document.getElementById('dashRegulares').innerText = contRegulares;
-            document.getElementById('dashAtencao').innerText = contAtencao;
-            document.getElementById('dashInadimplentes').innerText = contInadimplentes;
-
-            // Mostra os elementos na tela
             corpoTabela.innerHTML = html;
             carregando.style.display = 'none';
-            areaDashboard.style.display = 'grid';
             tabelaMembros.style.display = 'table';
         }
 
-        // Função do Filtro Select
-        window.filtrarTabela = function() {
-            const filtro = document.getElementById('filtroStatus').value;
-            const linhas = document.querySelectorAll('#corpoTabela tr');
-            
-            linhas.forEach(linha => {
-                const statusDaLinha = linha.getAttribute('data-status');
-                if(filtro === 'TODOS' || statusDaLinha === filtro) {
-                    linha.style.display = '';
+        window.dispararTelegram = async function(nomeIrmao, cimIrmao, botaoClicado) {
+            botaoClicado.innerText = "Enviando... ⏳";
+            botaoClicado.disabled = true;
+            botaoClicado.style.opacity = '0.7';
+
+            try {
+                const resposta = await fetch(URL_API_PLANILHAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ acao: 'alerta_telegram', nome: nomeIrmao, cim: cimIrmao })
+                });
+
+                const resultado = await resposta.json();
+                if (resultado.status === 'success') {
+                    botaoClicado.innerText = "✅ Alerta Enviado";
+                    botaoClicado.style.background = "#4CAF50";
                 } else {
-                    linha.style.display = 'none';
+                    throw new Error("Falha na API");
                 }
-            });
+            } catch (error) {
+                alert("Erro ao tentar enviar o alerta.");
+                botaoClicado.innerText = "Aprovar Envio";
+                botaoClicado.disabled = false;
+                botaoClicado.style.opacity = '1';
+            }
         };
 
         btnSair.addEventListener('click', () => {
