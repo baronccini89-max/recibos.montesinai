@@ -163,25 +163,30 @@
         const email = document.getElementById('email').value;
         const pin = document.getElementById('pin').value;
 
-        // Tenta fazer o login no Firebase
-        signInWithEmailAndPassword(auth, email, pin)
-            .then((userCredential) => {
-                const user = userCredential.user;
+signInWithEmailAndPassword(auth, email, pin)
+    .then((userCredential) => {
+        const user = userCredential.user;
+        // Convertemos para minúsculas e tiramos espaços para evitar erros
+        const emailLogado = user.email.toLowerCase().trim(); 
 
-                // --- AQUI ENTRA A NOSSA NOVA LÓGICA DE REDIRECIONAMENTO ---
-                if (user.email === 'baronccini89@gmail.com' || user.email === 'sergioedsonh@yahoo.com.br') {
-                    // Se for você ou o Sergio, vai para o Portal de Escolha
-                    window.location.replace("portal.html");
-                } else {
-                    // Se for qualquer outro irmão, vai direto para a tela de Membro
-                    window.location.replace("membro.html");
-                }
-                // -------------------------------------------------------
-            })
-            .catch((error) => {
-                console.error("Erro no login:", error);
-                alert("Erro ao aceder: Verifique o e-mail e o PIN.");
-            });
+        console.log("Login realizado por:", emailLogado);
+
+        // Verificação Master (Lucas e Sergio)
+        // Adicionei as duas versões do e-mail do Sergio por segurança
+        if (emailLogado === 'baronccini89@gmail.com' || 
+            emailLogado === 'sergioedsonh@yahoo.com.br' || 
+      {
+            
+            console.log("Acedendo ao Portal Master...");
+            window.location.replace("portal.html");
+        } else {
+            console.log("Acedendo ao Portal do Membro...");
+            window.location.replace("membro.html");
+        }
+    })
+    .catch((error) => {
+        alert("Erro ao aceder: Verifique o e-mail e o PIN.");
+    });
     });
 </script>
 </body>
