@@ -177,6 +177,8 @@
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === 'baronccini89@gmail.com') {
                 carregarDadosDaPlanilha();
+            if (user && user.email === 'sergioedsonh@yahoo.com.br') {
+                carregarDadosDaPlanilha();
             } else if (user) {
                 alert('Acesso negado. Esta área é restrita à Gestão Master.');
                 window.location.replace("membro.html");
