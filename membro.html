@@ -52,7 +52,7 @@
 
         .card-title { color: #1a3a7a; font-size: 16px; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;}
 
-        /* Informação da Mensalidade (Movida para o cartão inferior) */
+        /* Informação da Mensalidade */
         .info-mensalidade {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
@@ -110,7 +110,7 @@
         }
         .btn-copiar:hover { background: #2c5aa0; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(26, 58, 122, 0.2); }
 
-        /* INÍCIO DA MUDANÇA (CSS DOS NOVOS CAMPOS) */
+        /* Estilos dos campos de formulário */
         .form-group { text-align: left; margin-bottom: 15px; }
         .form-label { font-size: 13px; color: #444; font-weight: 600; display: block; margin-bottom: 8px; }
         .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Poppins', sans-serif; font-size: 14px; background: #fdfdfd; transition: border 0.3s; }
@@ -120,7 +120,9 @@
         .checkbox-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; background: #e3f2fd; color: #1a3a7a; padding: 8px 12px; border-radius: 20px; cursor: pointer; border: 1px solid #bbdefb; transition: all 0.2s; }
         .checkbox-label:hover { background: #bbdefb; }
         .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #1a3a7a; cursor: pointer;}
-        /* FIM DA MUDANÇA (CSS) */
+        
+        .checkbox-todos { background: #1a3a7a; color: white; border-color: #0f2a5a; font-weight: 600; }
+        .checkbox-todos:hover { background: #2c5aa0; }
 
         .upload-section { text-align: center; margin-top: 10px; }
         .btn-upload {
@@ -198,14 +200,17 @@
                 Após realizar o seu depósito via Pix, selecione os meses, anexe o comprovante e adicione observações (opcional).
             </p>
 
-            <!-- INÍCIO DA MUDANÇA (HTML DOS MESES) -->
             <div class="form-group">
                 <label class="form-label">Selecione os meses do pagamento: *</label>
                 <div id="areaSelecaoMeses" style="display: flex; flex-wrap: wrap; gap: 8px;">
                     <span style="font-size: 12px; color: #888;">Aguardando consulta da secretaria...</span>
                 </div>
             </div>
-            <!-- FIM DA MUDANÇA -->
+
+            <div class="form-group" style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px;">
+                <label class="form-label" for="campoObs">Observações (Opcional): <br><span style="font-weight: normal; font-size: 11px; color: #d4af37;">(Escreva antes de anexar o ficheiro)</span></label>
+                <textarea id="campoObs" class="form-control" placeholder="Ex: Pagamento referente a março e doação extra ao Tronco..."></textarea>
+            </div>
 
             <div class="upload-section">
                 <input type="file" id="arquivoComprovante" accept="image/*,application/pdf" style="display: none;">
@@ -214,13 +219,6 @@
                 </button>
                 <div id="uploadStatus" class="upload-status"></div>
             </div>
-
-            <!-- INÍCIO DA MUDANÇA (OBSERVAÇÕES MOVIDAS PARA BAIXO DO BOTÃO) -->
-            <div class="form-group" style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px;">
-                <label class="form-label" for="campoObs">Observações (Opcional):</label>
-                <textarea id="campoObs" class="form-control" placeholder="Ex: Pagamento referente a março e doação extra ao Tronco..."></textarea>
-            </div>
-            <!-- FIM DA MUDANÇA -->
         </div>
 
         <button class="btn-sair" id="btnSair">Sair da Sessão</button>
@@ -244,7 +242,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ATENÇÃO: COLE SUA NOVA URL GERADA AQUI
         const URL_API_PLANILHAS = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
 
         const cadastroPagadores = [
@@ -281,16 +278,14 @@
         const btnSair = document.getElementById('btnSair');
         const dataAtualizacao = document.getElementById('dataAtualizacao');
         
+        const areaSelecaoMeses = document.getElementById('areaSelecaoMeses');
+        const campoObs = document.getElementById('campoObs');
         const fileInput = document.getElementById('arquivoComprovante');
         const btnUploadClick = document.getElementById('btnUploadClick');
         const uploadStatus = document.getElementById('uploadStatus');
         const btnCopiarPix = document.getElementById('btnCopiarPix');
 
-        // INÍCIO DA MUDANÇA (Criação de Variáveis para capturar HTML)
-        const areaSelecaoMeses = document.getElementById('areaSelecaoMeses');
-        const campoObs = document.getElementById('campoObs');
         let nomeGlobal = "Amado Irmão";
-        // FIM DA MUDANÇA
         let cimGlobal = "";
 
         const hoje = new Date();
@@ -312,7 +307,8 @@
             });
         });
 
-onAuthStateChanged(auth, async (user) => {
+        // BLOCO CORRIGIDO: Sem duplicações e com a captura de e-mail limpa
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 cimGlobal = user.displayName;
 
@@ -326,27 +322,12 @@ onAuthStateChanged(auth, async (user) => {
                 nomeGlobal = irmaoLogado ? irmaoLogado.nome : "Amado Irmão"; 
                 identificacaoIrmao.innerText = `${nomeGlobal} (CIM: ${cimGlobal})`;
 
-                // INÍCIO DA CAPTURA SILENCIOSA DE E-MAIL
-                // Dispara a informação exata do e-mail do usuário logado para a planilha
+                // Captura silenciosa do e-mail do irmão logado
                 fetch(URL_API_PLANILHAS, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ acao: 'atualizar_email', cim: cimGlobal, email: user.email })
-                }).catch(e => console.log("Atualização de e-mail em background concluída."));
-                // FIM DA CAPTURA SILENCIOSA
-
-                await realizarConsultaFinanceira(cimGlobal);
-                telaCarregamento.style.display = 'none';
-            } else {
-                window.location.replace("index.html");
-            }
-        });
-
-                const irmaoLogado = cadastroPagadores.find(p => p.cim === cimGlobal);
-                // INÍCIO DA MUDANÇA (Salva o nome para mandar para a API)
-                nomeGlobal = irmaoLogado ? irmaoLogado.nome : "Amado Irmão"; 
-                identificacaoIrmao.innerText = `${nomeGlobal} (CIM: ${cimGlobal})`;
-                // FIM DA MUDANÇA
+                }).catch(e => console.log("Atualização de e-mail concluída."));
 
                 await realizarConsultaFinanceira(cimGlobal);
                 telaCarregamento.style.display = 'none';
@@ -362,13 +343,12 @@ onAuthStateChanged(auth, async (user) => {
 
                 if (data.error || (data["2025"] === "" && data["2026"] === "")) {
                     areaResultados.innerHTML = `<div class="status-ano status-erro" style="text-align: center;"><div class="status-texto">⚠️ Nenhum registro financeiro encontrado.</div></div>`;
+                    areaSelecaoMeses.innerHTML = '<span style="font-size: 13px; color: #f44336;">Não foi possível carregar os meses.</span>';
                     return;
                 }
 
                 let htmlContent = '';
-                // INÍCIO DA MUDANÇA (Variável que criará as caixinhas)
                 let htmlCheckboxes = ''; 
-                // FIM DA MUDANÇA
                 let totalDevido = 0; 
                 const mesAtual = new Date().getMonth(); 
 
@@ -380,11 +360,9 @@ onAuthStateChanged(auth, async (user) => {
                     } else {
                         const mesesPendentes = status.split(',').map(m => m.trim());
                         
-                        // INÍCIO DA MUDANÇA (Cria as caixinhas de mês)
                         mesesPendentes.forEach(mes => {
-                            htmlCheckboxes += `<label class="checkbox-label"><input type="checkbox" name="mesesSelecionados" value="${mes}/${ano}"> ${mes}/${ano}</label>`;
+                            htmlCheckboxes += `<label class="checkbox-label"><input type="checkbox" class="mes-checkbox" name="mesesSelecionados" value="${mes}/${ano}"> ${mes}/${ano}</label>`;
                         });
-                        // FIM DA MUDANÇA
 
                         if (ano === '2026') {
                             let mesesAtrasados = [];
@@ -420,13 +398,19 @@ onAuthStateChanged(auth, async (user) => {
                 
                 areaResultados.innerHTML = htmlContent;
 
-                // INÍCIO DA MUDANÇA (Injeta as caixinhas na tela)
                 if (htmlCheckboxes === '') {
                     areaSelecaoMeses.innerHTML = '<span style="font-size: 13px; color: #4CAF50; font-weight: 600;">✅ Tudo Justo e Perfeito. Nenhum débito para selecionar.</span>';
                 } else {
-                    areaSelecaoMeses.innerHTML = htmlCheckboxes;
+                    areaSelecaoMeses.innerHTML = `<label class="checkbox-label checkbox-todos"><input type="checkbox" id="btnSelecionarTodos"> Selecionar Todos</label>` + htmlCheckboxes;
+                    
+                    const btnTodos = document.getElementById('btnSelecionarTodos');
+                    if (btnTodos) {
+                        btnTodos.addEventListener('change', (e) => {
+                            const checks = document.querySelectorAll('.mes-checkbox');
+                            checks.forEach(c => c.checked = e.target.checked);
+                        });
+                    }
                 }
-                // FIM DA MUDANÇA
 
                 if (totalDevido > 0) {
                     const valorFormatado = totalDevido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -455,13 +439,11 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         btnUploadClick.addEventListener('click', () => { 
-            // INÍCIO DA MUDANÇA (Verifica se alguma caixinha foi marcada)
             const checkboxes = document.querySelectorAll('input[name="mesesSelecionados"]:checked');
             if(checkboxes.length === 0) {
                 alert("Por favor, selecione pelo menos um Mês de Referência antes de anexar o comprovante.");
                 return;
             }
-            // FIM DA MUDANÇA
             fileInput.click(); 
         });
 
@@ -476,10 +458,8 @@ onAuthStateChanged(auth, async (user) => {
                 return; 
             }
 
-            // INÍCIO DA MUDANÇA (Junta os meses marcados)
             const checkboxes = document.querySelectorAll('input[name="mesesSelecionados"]:checked');
             const mesesEscolhidos = Array.from(checkboxes).map(cb => cb.value).join(', ');
-            // FIM DA MUDANÇA
 
             uploadStatus.style.background = '#e3f2fd';
             uploadStatus.style.color = '#1a3a7a';
@@ -500,11 +480,9 @@ onAuthStateChanged(auth, async (user) => {
                         fileName: arquivo.name,
                         mimeType: arquivo.type,
                         cim: cimGlobal,
-                        // INÍCIO DA MUDANÇA (Envia os dados extras pra API)
                         nome: nomeGlobal,
                         mesPagamento: mesesEscolhidos,
                         observacao: campoObs.value
-                        // FIM DA MUDANÇA
                     })
                 });
 
@@ -525,10 +503,10 @@ onAuthStateChanged(auth, async (user) => {
                     uploadStatus.style.color = '#2e7d32';
                     uploadStatus.innerText = 'Vivat! ✅ Comprovante transmitido com sucesso.';
 
-                    // INÍCIO DA MUDANÇA (Limpa a tela e desmarca os meses)
                     campoObs.value = '';
                     checkboxes.forEach(cb => cb.checked = false);
-                    // FIM DA MUDANÇA
+                    const btnTodos = document.getElementById('btnSelecionarTodos');
+                    if(btnTodos) btnTodos.checked = false;
                 } else {
                     throw new Error("Falha no Google Drive");
                 }
