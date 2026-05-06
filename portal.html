@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Acesso - Monte Sinai</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .menu-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; border-top: 5px solid #d4af37; }
+        h2 { color: #0f2a5a; margin-bottom: 30px; font-size: 22px; }
+        .btn-menu { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+        .btn-gestao { background: #1a3a7a; }
+        .btn-membro { background: #d4af37; }
+        .btn-recibos { background: #2e7d32; } /* Verde para recibos */
+        .btn-menu:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); opacity: 0.9; }
+        .footer-logo { width: 60px; margin-top: 20px; opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <h2>Saudações, Amado Irmão!<br>Escolha o destino:</h2>
+        
+        <a href="gestao.html" class="btn-menu btn-gestao">📊 Área de Gestão (Master)</a>
+        <a href="membro.html" class="btn-menu btn-membro">👤 Meu Status de Membro</a>
+        
+        <div id="areaAdmin" style="display: none;">
+            <a href="recibos.html" class="btn-menu btn-recibos">🧾 Gerador de Recibos</a>
+        </div>
+
+        <img src="./logo.png" alt="Logo" class="footer-logo">
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Se for você (Lucas), libera o botão de recibos
+                if (user.email === 'baronccini89@gmail.com') {
+                    document.getElementById('areaAdmin').style.display = 'block';
+                }
+                
+                // Se não for nem você nem o Sergio, expulsa para a tela de membro (segurança extra)
+                if (user.email !== 'baronccini89@gmail.com' && user.email !== 'sergioedsonh@yahoo.com.br') {
+                    window.location.replace("membro.html");
+                }
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+    </script>
+</body>
+</html>
