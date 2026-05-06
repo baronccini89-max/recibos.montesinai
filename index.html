@@ -136,62 +136,53 @@
     </div>
 
     <!-- Importação dos módulos de Autenticação do Firebase -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // Credenciais do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
-            authDomain: "monte-sinai-recibos.firebaseapp.com",
-            projectId: "monte-sinai-recibos",
-            storageBucket: "monte-sinai-recibos.firebasestorage.app",
-            messagingSenderId: "880791367597",
-            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
-        };
+    // 1. Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+        authDomain: "monte-sinai-recibos.firebaseapp.com",
+        projectId: "monte-sinai-recibos",
+        storageBucket: "monte-sinai-recibos.firebasestorage.app",
+        messagingSenderId: "880791367597",
+        appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        const btnEntrar = document.getElementById('btnEntrar');
-        const errorMsg = document.getElementById('errorMsg');
+    // 2. Captura dos elementos da tela
+    const loginForm = document.getElementById('loginForm');
 
-        // Lógica executada ao clicar no botão "Entrar"
-        btnEntrar.addEventListener('click', () => {
-            const email = document.getElementById('emailInput').value.trim();
-            const senha = document.getElementById('senhaInput').value.trim();
+    // 3. Função que roda quando clica no botão "Aceder"
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const pin = document.getElementById('pin').value;
 
-            if(!email || !senha) {
-                errorMsg.innerText = 'Preencha todos os campos.';
-                errorMsg.style.display = 'block';
-                return;
-            }
+        // Tenta fazer o login no Firebase
+        signInWithEmailAndPassword(auth, email, pin)
+            .then((userCredential) => {
+                const user = userCredential.user;
 
-            // Interface de carregamento
-            btnEntrar.innerText = 'Autenticando...';
-            errorMsg.style.display = 'none';
-
-            // Autenticação com o Firebase
-            signInWithEmailAndPassword(auth, email, senha)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    
-                    // LÓGICA DE REDIRECIONAMENTO INTELIGENTE
-                    // Verifica se o email logado é o do administrador
-                    if (user.email === 'baronccini89@gmail.com') {
-                        // Se for o tesoureiro, vai para o Gerador de Recibos
-                        window.location.href = "admin.html";
-                    } else {
-                        // Se for qualquer outro irmão, vai para o Portal do Membro
-                        window.location.href = "membro.html";
-                    }
-                })
-                .catch((error) => {
-                    errorMsg.innerText = 'Erro: Usuário não encontrado ou senha incorreta.';
-                    errorMsg.style.display = 'block';
-                    btnEntrar.innerText = 'Entrar no App';
-                });
-        });
-    </script>
+                // --- AQUI ENTRA A NOSSA NOVA LÓGICA DE REDIRECIONAMENTO ---
+                if (user.email === 'baronccini89@gmail.com' || user.email === 'sergioedsonh@yahoo.com.br') {
+                    // Se for você ou o Sergio, vai para o Portal de Escolha
+                    window.location.replace("portal.html");
+                } else {
+                    // Se for qualquer outro irmão, vai direto para a tela de Membro
+                    window.location.replace("membro.html");
+                }
+                // -------------------------------------------------------
+            })
+            .catch((error) => {
+                console.error("Erro no login:", error);
+                alert("Erro ao aceder: Verifique o e-mail e o PIN.");
+            });
+    });
+</script>
 </body>
 </html>
