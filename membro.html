@@ -312,7 +312,7 @@
             });
         });
 
-        onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async (user) => {
             if (user) {
                 cimGlobal = user.displayName;
 
@@ -321,6 +321,26 @@
                     telaCarregamento.style.display = 'none';
                     return;
                 }
+
+                const irmaoLogado = cadastroPagadores.find(p => p.cim === cimGlobal);
+                nomeGlobal = irmaoLogado ? irmaoLogado.nome : "Amado Irmão"; 
+                identificacaoIrmao.innerText = `${nomeGlobal} (CIM: ${cimGlobal})`;
+
+                // INÍCIO DA CAPTURA SILENCIOSA DE E-MAIL
+                // Dispara a informação exata do e-mail do usuário logado para a planilha
+                fetch(URL_API_PLANILHAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ acao: 'atualizar_email', cim: cimGlobal, email: user.email })
+                }).catch(e => console.log("Atualização de e-mail em background concluída."));
+                // FIM DA CAPTURA SILENCIOSA
+
+                await realizarConsultaFinanceira(cimGlobal);
+                telaCarregamento.style.display = 'none';
+            } else {
+                window.location.replace("index.html");
+            }
+        });
 
                 const irmaoLogado = cadastroPagadores.find(p => p.cim === cimGlobal);
                 // INÍCIO DA MUDANÇA (Salva o nome para mandar para a API)
