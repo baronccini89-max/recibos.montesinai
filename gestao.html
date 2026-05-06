@@ -42,7 +42,6 @@
         table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
         thead { background: #f8f9fa; border-bottom: 2px solid #e0e0e0; }
         
-        /* Classe para permitir o clique nos cabeçalhos */
         th.ordenavel { padding: 15px 20px; color: #1a3a7a; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; transition: background 0.2s; }
         th.ordenavel:hover { background: #e2e8f0; }
         
@@ -54,7 +53,21 @@
         .badge-amarelo { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
         .badge-vermelho { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
+        /* INÍCIO DAS NOVAS REGRAS CSS PARA OS MESES */
         .info-pendencia { font-size: 13px; color: #444; margin-top: 5px; display: block; line-height: 1.5; }
+        
+        .meses-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .mes-badge { 
+            background: #f0f4f8; 
+            border: 1px solid #dcdcdc; 
+            color: #555; 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            letter-spacing: 0.5px;
+        }
+        /* FIM DAS NOVAS REGRAS CSS */
         
         .btn-acao { background: #d4af37; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .btn-acao:hover { background: #b8962e; }
@@ -73,6 +86,7 @@
             .badge-verde { color: #2e7d32 !important; }
             .badge-amarelo { color: #f57f17 !important; }
             .badge-vermelho { color: #c62828 !important; }
+            .mes-badge { border: 1px solid #000; background: transparent; color: #000; }
             .acao-col { display: none; }
             .painel-card::before { content: "Relatório Financeiro - Loja Monte Sinai Nº 371"; display: block; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; color: #000; }
         }
@@ -169,7 +183,6 @@
         const btnSair = document.getElementById('btnSair');
         const areaDashboard = document.getElementById('areaDashboard');
 
-        // Variáveis globais para controlar a ordenação e os dados
         let dadosGlobais = [];
         let ordemAtual = { coluna: 'nome', crescente: true };
 
@@ -194,13 +207,8 @@
                     return;
                 }
                 
-                // Processa a inteligência dos dados apenas uma vez
                 dadosGlobais = processarDados(membrosAPI);
-                
-                // Atualiza o quadro resumo superior
                 atualizarDashboard();
-                
-                // Ordenação padrão inicial e renderização
                 window.ordenarTabela('nome');
 
             } catch (error) {
@@ -208,7 +216,6 @@
             }
         }
 
-        // Função responsável por calcular a situação real baseada no mês atual
         function processarDados(membrosAPI) {
             const dataAtual = new Date();
             const mesAtual = dataAtual.getMonth();
@@ -221,13 +228,11 @@
                 let arr25 = (txt25 && txt25.toUpperCase() !== 'PAGO' && txt25.toUpperCase() !== 'ISENTO') ? txt25.split(',').map(x => x.trim()) : [];
                 let arr26 = (txt26 && txt26.toUpperCase() !== 'PAGO' && txt26.toUpperCase() !== 'ISENTO') ? txt26.split(',').map(x => x.trim()) : [];
                 
-                // O cálculo de atrasos é feito somando todos os passados/atuais
                 let atrasosCalculados = arr25.length;
                 arr26.forEach(mes => {
                     if (mapaMeses[mes] <= mesAtual) { atrasosCalculados++; }
                 });
 
-                // Define o grupo para o filtro
                 let grupoAtraso = '0';
                 if (atrasosCalculados >= 1 && atrasosCalculados <= 5) grupoAtraso = '1-5';
                 else if (atrasosCalculados >= 6) grupoAtraso = '6+';
@@ -259,7 +264,6 @@
             areaDashboard.style.display = 'grid';
         }
 
-        // Nova inteligência: Ordenar Tabela
         window.ordenarTabela = function(colunaClicada) {
             if (ordemAtual.coluna === colunaClicada) {
                 ordemAtual.crescente = !ordemAtual.crescente;
@@ -289,7 +293,6 @@
             window.aplicarFiltros();
         };
 
-        // Nova inteligência: Filtros combinados (Nome + Status)
         window.aplicarFiltros = function() {
             const termoBusca = document.getElementById('buscaNome').value.toLowerCase();
             const filtroMeses = document.getElementById('filtroMeses').value;
@@ -303,14 +306,16 @@
             desenharHTMLTabela(dadosFiltrados);
         };
 
-        // Responsável unicamente por colocar os dados no ecrã de forma exata
+        // =========================================================================
+        // INÍCIO DAS MUDANÇAS NA FUNÇÃO: Desenhar a tabela com o novo layout visual
+        // =========================================================================
         function desenharHTMLTabela(dadosParaExibir) {
             let html = '';
 
             dadosParaExibir.forEach(membro => {
                 let corSemaforo = '';
                 let textoSemaforo = '';
-                let botaoNotificar = `<button class="btn-acao btn-desativado" disabled>Sem ação</button>`;
+                let botaoNotificar = `<button class="btn-acao btn-desativado" disabled title="Notificação apenas para 6+ meses">Sem ação</button>`;
 
                 if (membro.atrasosCalculados === 0) {
                     corSemaforo = 'badge-verde'; 
@@ -321,20 +326,32 @@
                 } else {
                     corSemaforo = 'badge-vermelho'; 
                     textoSemaforo = 'Inadimplente';
-                    botaoNotificar = `<button class="btn-acao" onclick="window.dispararTelegram('${membro.nome}', '${membro.cim}', this)">Aprovar Envio</button>`;
+                    botaoNotificar = `<button class="btn-acao" onclick="window.dispararTelegram('${membro.nome}', '${membro.cim}', this)" title="Forçar alerta manual imediato">Aprovar Envio</button>`;
                 }
 
-                // CORREÇÃO CRÍTICA: O texto agora reflete 100% a planilha
-                let textoExibicao25 = membro.textoExato2025 === "" ? "PAGO" : membro.textoExato2025;
-                let textoExibicao26 = membro.textoExato2026 === "" ? "PAGO" : membro.textoExato2026;
+                let textoExibicao25 = membro.textoExato2025 === "" ? "PAGO" : membro.textoExato2025.toUpperCase();
+                let textoExibicao26 = membro.textoExato2026 === "" ? "PAGO" : membro.textoExato2026.toUpperCase();
                 
-                // Tratamento especial para isenção total
-                if(membro.textoExato2025.toUpperCase() === 'ISENTO' && membro.textoExato2026.toUpperCase() === 'ISENTO') {
-                    textoExibicao25 = "ISENTO"; 
-                    textoExibicao26 = "ISENTO";
+                // 1. Lógica para 2025: Só aparece se houver pendência.
+                let detalhe2025 = '';
+                if (textoExibicao25 !== 'PAGO' && textoExibicao25 !== 'ISENTO') {
+                    // Transforma a string "JAN, FEV" em badges HTML
+                    let badges25 = textoExibicao25.split(',').map(m => `<span class="mes-badge">${m.trim()}</span>`).join('');
+                    detalhe2025 = `<div style="margin-bottom: 8px;"><b>2025:</b> <div class="meses-container">${badges25}</div></div>`;
                 }
 
-                let detalheHTML = `<span class="info-pendencia"><b>2025:</b> ${textoExibicao25}<br><b>2026:</b> ${textoExibicao26}</span>`;
+                // 2. Lógica para 2026: Exibe "Quitado", "Isento" ou os badges.
+                let detalhe2026 = '';
+                if (textoExibicao26 === 'PAGO') {
+                    detalhe2026 = `<div><b>2026:</b> <span style="color:#2e7d32; font-weight:600;">Quitado ✅</span></div>`;
+                } else if (textoExibicao26 === 'ISENTO') {
+                    detalhe2026 = `<div><b>2026:</b> <span style="color:#888; font-weight:600;">Isento</span></div>`;
+                } else {
+                    let badges26 = textoExibicao26.split(',').map(m => `<span class="mes-badge">${m.trim()}</span>`).join('');
+                    detalhe2026 = `<div><b>2026:</b> <div class="meses-container">${badges26}</div></div>`;
+                }
+
+                let detalheHTML = `<div class="info-pendencia">${detalhe2025}${detalhe2026}</div>`;
 
                 html += `
                     <tr>
@@ -354,6 +371,9 @@
             carregando.style.display = 'none';
             tabelaMembros.style.display = 'table';
         }
+        // =========================================================================
+        // FIM DAS MUDANÇAS NA FUNÇÃO
+        // =========================================================================
 
         window.dispararTelegram = async function(nomeIrmao, cimIrmao, botaoClicado) {
             botaoClicado.innerText = "Enviando... ⏳";
