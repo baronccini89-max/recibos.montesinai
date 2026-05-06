@@ -53,24 +53,12 @@
         .badge-amarelo { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
         .badge-vermelho { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
-        /* INÍCIO DAS NOVAS REGRAS CSS PARA OS MESES */
         .info-pendencia { font-size: 13px; color: #444; margin-top: 5px; display: block; line-height: 1.5; }
-        
         .meses-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-        .mes-badge { 
-            background: #f0f4f8; 
-            border: 1px solid #dcdcdc; 
-            color: #555; 
-            padding: 3px 8px; 
-            border-radius: 6px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            letter-spacing: 0.5px;
-        }
-        /* FIM DAS NOVAS REGRAS CSS */
+        .mes-badge { background: #f0f4f8; border: 1px solid #dcdcdc; color: #555; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
         
-        .btn-acao { background: #d4af37; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-acao:hover { background: #b8962e; }
+        .btn-acao { color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; text-align: center; }
+        .btn-acao:hover { opacity: 0.8; }
         .btn-desativado { background: #e0e0e0; color: #999; cursor: not-allowed; }
 
         #carregando { text-align: center; padding: 60px; color: #1a3a7a; font-weight: 600; font-size: 16px; }
@@ -148,7 +136,7 @@
                             <th class="ordenavel" onclick="window.ordenarTabela('cim')" title="Clique para ordenar">CIM ↕️</th>
                             <th class="ordenavel" onclick="window.ordenarTabela('atrasos')" title="Clique para ordenar">Situação Atual ↕️</th>
                             <th>Detalhes Financeiros</th>
-                            <th class="acao-col">Ações</th>
+                            <th class="acao-col" style="min-width: 150px;">Ações Manuais</th>
                         </tr>
                     </thead>
                     <tbody id="corpoTabela">
@@ -306,41 +294,45 @@
             desenharHTMLTabela(dadosFiltrados);
         };
 
-        // =========================================================================
-        // INÍCIO DAS MUDANÇAS NA FUNÇÃO: Desenhar a tabela com o novo layout visual
-        // =========================================================================
         function desenharHTMLTabela(dadosParaExibir) {
             let html = '';
 
             dadosParaExibir.forEach(membro => {
                 let corSemaforo = '';
                 let textoSemaforo = '';
-                let botaoNotificar = `<button class="btn-acao btn-desativado" disabled title="Notificação apenas para 6+ meses">Sem ação</button>`;
+                let botoesAcao = ''; // Nova lógica para os botões
 
+                // Configuração das Cores e Botões baseados no atraso
                 if (membro.atrasosCalculados === 0) {
                     corSemaforo = 'badge-verde'; 
                     textoSemaforo = 'Regular';
+                    botoesAcao = `<button class="btn-acao btn-desativado" disabled>Sem ação</button>`;
                 } else if (membro.atrasosCalculados >= 1 && membro.atrasosCalculados <= 5) {
                     corSemaforo = 'badge-amarelo'; 
                     textoSemaforo = 'Atenção';
+                    // Irmãos com atraso leve têm apenas o botão direto
+                    botoesAcao = `<button class="btn-acao" style="background:#d4af37;" onclick="window.notificarIrmao('${membro.nome}', '${membro.cim}', this)" title="Avisa o Irmão diretamente no Telegram">Notificar Irmão</button>`;
                 } else {
                     corSemaforo = 'badge-vermelho'; 
                     textoSemaforo = 'Inadimplente';
-                    botaoNotificar = `<button class="btn-acao" onclick="window.dispararTelegram('${membro.nome}', '${membro.cim}', this)" title="Forçar alerta manual imediato">Aprovar Envio</button>`;
+                    // Irmãos com atraso crítico (6+) têm ambos os botões
+                    botoesAcao = `
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <button class="btn-acao" style="background:#1a3a7a;" onclick="window.dispararAlertaLoja('${membro.nome}', '${membro.cim}', this)" title="Avisa Tesouraria e VM">Alerta Loja (6+)</button>
+                            <button class="btn-acao" style="background:#d4af37;" onclick="window.notificarIrmao('${membro.nome}', '${membro.cim}', this)" title="Avisa o Irmão diretamente no Telegram">Notificar Irmão</button>
+                        </div>
+                    `;
                 }
 
                 let textoExibicao25 = membro.textoExato2025 === "" ? "PAGO" : membro.textoExato2025.toUpperCase();
                 let textoExibicao26 = membro.textoExato2026 === "" ? "PAGO" : membro.textoExato2026.toUpperCase();
                 
-                // 1. Lógica para 2025: Só aparece se houver pendência.
                 let detalhe2025 = '';
                 if (textoExibicao25 !== 'PAGO' && textoExibicao25 !== 'ISENTO') {
-                    // Transforma a string "JAN, FEV" em badges HTML
                     let badges25 = textoExibicao25.split(',').map(m => `<span class="mes-badge">${m.trim()}</span>`).join('');
-                    detalhe2025 = `<div style="margin-bottom: 8px;"><b>2025:</b> <div class="meses-container">${badges25}</div></div>`;
+                    detalhe2025 = `<div style="margin-bottom: 8px;"><b style="color:#c62828;">2025 (Pendentes):</b> <div class="meses-container">${badges25}</div></div>`;
                 }
 
-                // 2. Lógica para 2026: Exibe "Quitado", "Isento" ou os badges.
                 let detalhe2026 = '';
                 if (textoExibicao26 === 'PAGO') {
                     detalhe2026 = `<div><b>2026:</b> <span style="color:#2e7d32; font-weight:600;">Quitado ✅</span></div>`;
@@ -348,7 +340,7 @@
                     detalhe2026 = `<div><b>2026:</b> <span style="color:#888; font-weight:600;">Isento</span></div>`;
                 } else {
                     let badges26 = textoExibicao26.split(',').map(m => `<span class="mes-badge">${m.trim()}</span>`).join('');
-                    detalhe2026 = `<div><b>2026:</b> <div class="meses-container">${badges26}</div></div>`;
+                    detalhe2026 = `<div><b style="color:#c62828;">2026 (Pendentes):</b> <div class="meses-container">${badges26}</div></div>`;
                 }
 
                 let detalheHTML = `<div class="info-pendencia">${detalhe2025}${detalhe2026}</div>`;
@@ -362,7 +354,7 @@
                             <span style="font-size:11px; color:#888; font-weight: 600;">(${membro.atrasosCalculados} atrasos reais)</span>
                         </td>
                         <td>${detalheHTML}</td>
-                        <td class="acao-col">${botaoNotificar}</td>
+                        <td class="acao-col">${botoesAcao}</td>
                     </tr>
                 `;
             });
@@ -371,11 +363,9 @@
             carregando.style.display = 'none';
             tabelaMembros.style.display = 'table';
         }
-        // =========================================================================
-        // FIM DAS MUDANÇAS NA FUNÇÃO
-        // =========================================================================
 
-        window.dispararTelegram = async function(nomeIrmao, cimIrmao, botaoClicado) {
+        // Função para o Botão "Alerta Loja (6+)"
+        window.dispararAlertaLoja = async function(nomeIrmao, cimIrmao, botaoClicado) {
             botaoClicado.innerText = "Enviando... ⏳";
             botaoClicado.disabled = true;
             botaoClicado.style.opacity = '0.7';
@@ -389,14 +379,45 @@
 
                 const resultado = await resposta.json();
                 if (resultado.status === 'success') {
-                    botaoClicado.innerText = "✅ Alerta Enviado";
+                    botaoClicado.innerText = "✅ Loja Avisada";
                     botaoClicado.style.background = "#4CAF50";
                 } else {
                     throw new Error("Falha na API");
                 }
             } catch (error) {
-                alert("Erro ao tentar enviar o alerta.");
-                botaoClicado.innerText = "Aprovar Envio";
+                alert("Erro ao tentar enviar o alerta para a loja.");
+                botaoClicado.innerText = "Alerta Loja (6+)";
+                botaoClicado.disabled = false;
+                botaoClicado.style.opacity = '1';
+            }
+        };
+
+        // Função para o Botão "Notificar Irmão"
+        window.notificarIrmao = async function(nomeIrmao, cimIrmao, botaoClicado) {
+            botaoClicado.innerText = "Enviando... ⏳";
+            botaoClicado.disabled = true;
+            botaoClicado.style.opacity = '0.7';
+
+            try {
+                const resposta = await fetch(URL_API_PLANILHAS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ acao: 'notificar_irmao', nome: nomeIrmao, cim: cimIrmao })
+                });
+
+                const resultado = await resposta.json();
+                if (resultado.status === 'success') {
+                    botaoClicado.innerText = "✅ Irmão Avisado";
+                    botaoClicado.style.background = "#4CAF50";
+                } else {
+                    alert("Atenção: " + resultado.message);
+                    botaoClicado.innerText = "Notificar Irmão";
+                    botaoClicado.disabled = false;
+                    botaoClicado.style.opacity = '1';
+                }
+            } catch (error) {
+                alert("Erro de comunicação com a API.");
+                botaoClicado.innerText = "Notificar Irmão";
                 botaoClicado.disabled = false;
                 botaoClicado.style.opacity = '1';
             }
