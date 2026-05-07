@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Recibos - Monte Sinai Nº 371</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; color: #333; padding-bottom: 50px; }
+        
+        header { background: linear-gradient(135deg, #0f2a5a 0%, #1a3a7a 100%); color: white; padding: 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        header h1 { font-size: 22px; font-weight: 700; }
+        header p { font-size: 13px; color: #d4af37; text-transform: uppercase; letter-spacing: 1px; }
+
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid #1a3a7a; margin-bottom: 20px; }
+        
+        /* CAIXA DE HISTÓRICO RESTAURADA */
+        .historico-box { background: #e3f2fd; border: 1px solid #bbdefb; padding: 18px; border-radius: 8px; margin-bottom: 25px; }
+        .historico-box h3 { font-size: 16px; color: #1a3a7a; margin-bottom: 8px; font-weight: 700;}
+        .historico-box p { font-size: 14px; color: #444; margin-bottom: 12px; }
+        .btn-toggle { background: transparent; border: 2px solid #1a3a7a; color: #1a3a7a; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; transition: 0.3s; }
+        .btn-toggle:hover { background: #1a3a7a; color: white; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; background: white; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #1a3a7a; color: white; }
+        tr:hover { background: #f9f9f9; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #1a3a7a; font-size: 14px; }
+        select, input { width: 100%; padding: 14px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        select:focus, input:focus { border-color: #d4af37; outline: none; }
+
+        .status-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .status-box h3 { font-size: 14px; color: #856404; margin-bottom: 5px; }
+        .status-box p { font-size: 13px; color: #666; }
+
+        .btn-gerar { width: 100%; background: linear-gradient(135deg, #1a3a7a 0%, #2c5aa0 100%); color: white; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-gerar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 58, 122, 0.3); }
+        .btn-gerar:disabled { background: #ccc; cursor: not-allowed; }
+
+        .btn-voltar { display: block; text-align: center; margin-top: 25px; color: #1a3a7a; text-decoration: none; font-weight: 600; }
+
+        /* ================= RECIBO OFICIAL (PARA IMPRESSÃO) ================= */
+        #areaRecibo { display: none; margin-top: 40px; padding: 40px; border: 2px solid #0f2a5a; background: white; border-radius: 10px; }
+        .recibo-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #d4af37; padding-bottom: 20px; margin-bottom: 25px; }
+        .recibo-logo { width: 80px; }
+        .recibo-titulo { text-align: right; }
+        .recibo-titulo h2 { color: #0f2a5a; font-size: 24px; font-weight: 800;}
+        .recibo-titulo p { color: #666; font-weight: 600; font-size: 14px; }
+        .recibo-numero { font-size: 16px; color: #c62828; font-weight: bold; margin-top: 5px; }
+        
+        .recibo-valor { font-size: 24px; font-weight: 800; color: #0f2a5a; background: #e3f2fd; padding: 12px 20px; display: inline-block; border-radius: 8px; margin-bottom: 25px; }
+        .recibo-corpo { font-size: 16px; line-height: 1.8; text-align: justify; margin-bottom: 40px; color: #333; }
+        .assinatura { text-align: center; border-top: 1px solid #333; width: 300px; margin-left: auto; padding-top: 10px; font-weight: 600; color: #0f2a5a; }
+
+        @media print {
+            header, .card, .btn-voltar, .historico-box { display: none !important; }
+            body { background: white; }
+            #areaRecibo { display: block !important; border: 2px solid #0f2a5a; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🧾 Gerador de Recibos</h1>
+        <p>Tesouraria Monte Sinai Nº 371</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="historico-box">
+            <h3>📜 Controle de Emissões</h3>
+            <p id="ultimoReciboDestaque">Conectando ao Banco de Dados...</p>
+            <button class="btn-toggle" onclick="toggleHistorico()">Exibir / Ocultar Histórico Completo</button>
+            <div id="tabelaHistorico" style="display:none; overflow-x: auto;">
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="form-group">
+                <label>Selecionar Irmão (Nome e CIM):</label>
+                <select id="selectIrmao">
+                    <option value="">Carregando obreiros...</option>
+                </select>
+            </div>
+
+            <div id="statusBox" class="status-box">
+                <h3>🔍 Pendências na Planilha:</h3>
+                <p id="textoPendencias"></p>
+            </div>
+
+            <div class="form-group">
+                <label>Meses de Pagamento (para a baixa):</label>
+                <input type="text" id="inputMeses" placeholder="Ex: MAR, ABR de 2026">
+            </div>
+
+            <div class="form-group">
+                <label>Valor Total Recebido (R$):</label>
+                <input type="number" id="inputValor" value="90.00" step="0.01">
+            </div>
+
+            <button class="btn-gerar" id="btnGerar" onclick="processarRecibo()">Registrar Recibo, Salvar e Imprimir</button>
+        </div>
+
+        <a href="portal.html" class="btn-voltar">⬅ Voltar ao Painel Master</a>
+
+        <div id="areaRecibo">
+            <div class="recibo-header">
+                <img src="./logo.png" class="recibo-logo">
+                <div class="recibo-titulo">
+                    <h2>RECIBO OFICIAL</h2>
+                    <p>A.·. R.·. L.·. S.·. Monte Sinai Nº 371</p>
+                    <div class="recibo-numero" id="resNumeroDisplay">Nº ----/--</div>
+                </div>
+            </div>
+            <div class="recibo-valor" id="resValor">R$ 0,00</div>
+            <div class="recibo-corpo">
+                Recebemos do Amado Irmão <strong id="resNome">__________</strong>, 
+                a importância mencionada acima, referente à quitação das mensalidades de 
+                <strong id="resMeses">__________</strong>.
+                <br><br>
+                Por ser verdade, firmamos o presente.
+                <br><br>
+                <strong>Porto Alegre, <span id="resData"></span></strong>
+            </div>
+            <div class="assinatura">
+                Lucas Souza Baronccini<br>Tesoureiro
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        // Importando os comandos do Banco de Dados
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG2f75cmIH7p4tA4AwFoWgQg0DTYRoxW8",
+            authDomain: "monte-sinai-recibos.firebaseapp.com",
+            projectId: "monte-sinai-recibos",
+            storageBucket: "monte-sinai-recibos.firebasestorage.app",
+            messagingSenderId: "880791367597",
+            appId: "1:880791367597:web:5cbba591d90e41cd56bb24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        const URL_API = 'https://script.google.com/macros/s/AKfycbyP6ubThekx-CPjY9tsDirIgDhwyM-u3OmVvJ7Zzl_6GBisYCWPOGt2Hi9O2UxBjhTPlw/exec';
+
+        let membrosCache = [];
+        let cimSelecionado = "";
+        let proximoNumeroGlobal = "";
+
+        // Autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === 'baronccini89@gmail.com') {
+                carregarMembros();
+                carregarHistoricoDoBanco(); // Aciona a busca de históricos!
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+
+        // 1. Mostrar/Esconder Tabela
+        window.toggleHistorico = function() {
+            const tab = document.getElementById('tabelaHistorico');
+            tab.style.display = tab.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 2. O Motor do Histórico (Vai ao Firestore)
+        async function carregarHistoricoDoBanco() {
+            try {
+                const recibosRef = collection(db, 'recibos_gerados');
+                const q = query(recibosRef, orderBy('dataCriacao', 'desc'), limit(15));
+                const querySnapshot = await getDocs(q);
+                
+                let html = "<table><tr><th>Recibo Nº</th><th>Irmão</th><th>Valor</th><th>Data</th></tr>";
+                const anoAtual = new Date().getFullYear();
+                
+                if (querySnapshot.empty) {
+                    proximoNumeroGlobal = `${anoAtual}-01`;
+                    document.getElementById('ultimoReciboDestaque').innerHTML = `Nenhum recibo emitido este ano. O próximo será: <strong style="color: #d4af37; font-size: 16px;">Nº ${proximoNumeroGlobal}</strong>`;
+                } else {
+                    const docs = querySnapshot.docs;
+                    const ultimo = docs[0].data();
+                    
+                    // Cálculo da sequência
+                    const partes = ultimo.numero.split('-');
+                    if(partes[0] == anoAtual) {
+                        const seq = parseInt(partes[1]) + 1;
+                        proximoNumeroGlobal = `${anoAtual}-${seq.toString().padStart(2, '0')}`;
+                    } else {
+                         proximoNumeroGlobal = `${anoAtual}-01`;
+                    }
+
+                    document.getElementById('ultimoReciboDestaque').innerHTML = `Último gerado: <strong>${ultimo.numero}</strong> | Próximo a emitir: <strong style="color: #c62828; font-size: 16px;">Nº ${proximoNumeroGlobal}</strong>`;
+                    
+                    docs.forEach(doc => {
+                        const r = doc.data();
+                        const dataF = new Date(r.dataCriacao).toLocaleDateString('pt-BR');
+                        html += `<tr><td><strong>${r.numero}</strong></td><td>${r.nome}</td><td>R$ ${r.valor}</td><td>${dataF}</td></tr>`;
+                    });
+                }
+                html += "</table>";
+                document.getElementById('tabelaHistorico').innerHTML = html;
+
+            } catch(e) {
+                document.getElementById('ultimoReciboDestaque').innerHTML = "Erro ao buscar histórico no Banco de Dados.";
+            }
+        }
+
+        // 3. Puxa Irmãos (Nome + CIM)
+        async function carregarMembros() {
+            const resp = await fetch(`${URL_API}?acao=listar_todos`);
+            membrosCache = await resp.json();
+            const select = document.getElementById('selectIrmao');
+            select.innerHTML = '<option value="">Escolha um Irmão...</option>';
+            membrosCache.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.cim;
+                opt.text = `${m.nome} - CIM: ${m.cim}`; // COM CIM!
+                select.appendChild(opt);
+            });
+        }
+
+        // 4. Mostra Pendências ao selecionar
+        document.getElementById('selectIrmao').addEventListener('change', async (e) => {
+            cimSelecionado = e.target.value;
+            if(!cimSelecionado) return;
+
+            document.getElementById('statusBox').style.display = 'block';
+            document.getElementById('textoPendencias').innerText = "Aguarde, consultando...";
+
+            const resp = await fetch(`${URL_API}?acao=consulta&cim=${cimSelecionado}`);
+            const pendencias = await resp.json();
+            
+            let texto = "";
+            if(pendencias["2025"] && pendencias["2025"] !== "PAGO") texto += "2025: " + pendencias["2025"] + " | ";
+            if(pendencias["2026"] && pendencias["2026"] !== "PAGO") texto += "2026: " + pendencias["2026"];
+            
+            document.getElementById('textoPendencias').innerText = texto || "Tudo perfeitamente em dia!";
+        });
+
+        // 5. A Engenharia Completa (Gerar, Salvar e Baixar)
+        window.processarRecibo = async function() {
+            const select = document.getElementById('selectIrmao');
+            const nomeComCim = select.options[select.selectedIndex].text;
+            const nomeApenas = nomeComCim.split(' - ')[0]; 
+            
+            const meses = document.getElementById('inputMeses').value;
+            const valor = document.getElementById('inputValor').value;
+
+            if(!cimSelecionado || !meses) return alert("Selecione o irmão e digite o mês!");
+
+            const btn = document.getElementById('btnGerar');
+            btn.disabled = true;
+            btn.innerText = "Registrando no Banco de Dados...";
+
+            // Preenche os dados visuais do Recibo
+            document.getElementById('resNumeroDisplay').innerText = "Nº " + proximoNumeroGlobal;
+            document.getElementById('resNome').innerText = nomeComCim;
+            document.getElementById('resMeses').innerText = meses;
+            document.getElementById('resValor').innerText = "R$ " + parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('resData').innerText = new Date().toLocaleDateString('pt-BR');
+            
+            const areaRecibo = document.getElementById('areaRecibo');
+            areaRecibo.style.display = 'block';
+
+            try {
+                // SALVA A SEQUÊNCIA NO BANCO DE DADOS FIREBASE
+                await addDoc(collection(db, 'recibos_gerados'), {
+                    numero: proximoNumeroGlobal,
+                    cim: cimSelecionado,
+                    nome: nomeApenas,
+                    meses: meses,
+                    valor: valor,
+                    dataCriacao: new Date().toISOString()
+                });
+
+                btn.innerText = "Enviando cópia para o Drive...";
+
+                // Tira a foto (html2canvas) e envia para o Google Script
+                const canvas = await html2canvas(areaRecibo, { scale: 2 });
+                const base64Image = canvas.toDataURL('image/png').split(',')[1];
+
+                await fetch(URL_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        acao: 'gerar_recibo_oficial',
+                        cim: cimSelecionado,
+                        nome: nomeApenas,
+                        meses: meses,
+                        fileBase64: base64Image,
+                        fileName: `Recibo_${proximoNumeroGlobal}_${nomeApenas.replace(/\s+/g, '_')}.png`,
+                        mimeType: 'image/png'
+                    })
+                });
+
+                // Atualiza o histórico na tela instantaneamente
+                await carregarHistoricoDoBanco();
+
+                // Chama a impressão do Navegador
+                window.print();
+                
+            } catch (e) {
+                console.error(e);
+                alert("Falha na comunicação. Verifique a internet.");
+            } finally {
+                btn.innerText = "Registrar Recibo, Salvar e Imprimir";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
