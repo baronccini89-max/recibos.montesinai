@@ -134,7 +134,20 @@
                     await updateProfile(user, {
                         displayName: cim
                     });
-
+                    
+                    // 3. NOVO: Envia o e-mail para a Coluna J da Planilha
+               try {
+                    await fetch(urlNossaAPI, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ 
+                    acao: 'atualizar_email', 
+                    cim: cim, 
+                    email: email 
+                    })
+                    });
+                    } catch (e) { console.error("Erro ao sincronizar e-mail"); }
+                    
                     alert('Conta criada com sucesso! O seu CIM foi vinculado de forma segura.');
                     
                     // Redireciona de volta para a tela de login
