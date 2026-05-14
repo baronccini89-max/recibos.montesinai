@@ -516,6 +516,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
+                        acao: 'upload_comprovante',
                         fileBase64: base64Data,
                         fileName: arquivo.name,
                         mimeType: arquivo.type,
