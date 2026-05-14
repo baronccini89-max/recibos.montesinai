@@ -771,6 +771,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                         body: JSON.stringify({
+                            acao: 'gerar_recibo_oficial',
                             nome: nomePagador, cim: cimPagador, numero: numeroRecibo, valor: valor, mesesRaw: mesesSelecionados, mesesText: mesesParaArquivo, motivo: descricao,
                             htmlDrive: `<html><body style="font-family:Arial;padding:40px;"><h2>RECIBO Nº ${numeroRecibo}</h2><p>Data: ${dataFormatada}</p><p>Nome: ${nomePagadorComCim}</p><p>Valor: R$ ${valorFormatado}</p><p>Referente a: ${mesosTexto || descricao}</p></body></html>`
                         })
