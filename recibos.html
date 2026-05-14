@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gerador de Recibos - Monte Sinai</title>
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* ================= ESTILOS GERAIS (TELA) ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -762,26 +765,54 @@
                 document.getElementById('preview').innerHTML = reciboHTML;
                 document.getElementById('btnBaixar').style.display = 'block';
 
-                const mesesParaArquivo = mesesSelecionados.map(m => m.text.replace(' de ', ' ').toLowerCase()).join(', ');
+                const API_URL = 'https://script.google.com/macros/s/AKfycbwybYUEjWEJFp_K7riISrWfqqX2d4nn5dbgSBuZJQDNqE1MXCJf-Iv6nGHvrwTy9m6C/exec';
 
-                // Envia para a API do Google Script que guarda no Drive
+                // ── GERAR PDF E SALVAR NO DRIVE ──────────────────────────────────
                 try {
-                    const urlPlanilha = 'https://script.google.com/macros/s/AKfycbwybYUEjWEJFp_K7riISrWfqqX2d4nn5dbgSBuZJQDNqE1MXCJf-Iv6nGHvrwTy9m6C/exec'; 
-                    await fetch(urlPlanilha, {
+                    // 1. Captura o recibo visual como imagem
+                    const reciboDom = document.querySelector('#preview .receipt');
+                    const canvas = await html2canvas(reciboDom, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+                    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+                    // 2. Monta o PDF A4 com o recibo
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pdfW = pdf.internal.pageSize.getWidth();
+                    const pdfH = (canvas.height * pdfW) / canvas.width;
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+                    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+
+                    // 3. Monta o nome no padrão: "Recibo 2026-65 - Nome - CIM 12345 - maio 2026.pdf"
+                    const nomeMesesArquivo = mesesSelecionados.map(m => m.text.toLowerCase()).join(', ');
+
+                    // 4. Envia o PDF para salvar no Google Drive (pasta Recibos 2026)
+                    await fetch(API_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({
                             acao: 'gerar_recibo_oficial',
-                            nome: nomePagador, cim: cimPagador, numero: numeroRecibo, valor: valor, mesesRaw: mesesSelecionados, mesesText: mesesParaArquivo, motivo: descricao,
-                            htmlDrive: `<html><body style="font-family:Arial;padding:40px;"><h2>RECIBO Nº ${numeroRecibo}</h2><p>Data: ${dataFormatada}</p><p>Nome: ${nomePagadorComCim}</p><p>Valor: R$ ${valorFormatado}</p><p>Referente a: ${mesosTexto || descricao}</p></body></html>`
+                            nome: nomePagador,
+                            cim: cimPagador,
+                            numero: numeroRecibo,
+                            valor: valor,
+                            mesesRaw: mesesSelecionados,
+                            mesesText: nomeMesesArquivo,
+                            fileBase64: pdfBase64,
+                            mimeType: 'application/pdf'
                         })
                     });
-                } catch (e) { console.error('Erro ao enviar para o Google:', e); }
 
-                // NOVO: Chama a nossa API Principal para dar a baixa e limpar o Aguardando Ação na mesma hora!
+                    // Guarda o base64 para o botão Baixar usar sem recapturar
+                    window._ultimoPdfBase64 = pdfBase64;
+                    window._ultimoNomeRecibo = `Recibo ${numeroRecibo} - ${nomePagador} - CIM ${cimPagador} - ${nomeMesesArquivo}.pdf`;
+
+                } catch (ePdf) {
+                    console.error('Erro ao gerar/salvar PDF:', ePdf);
+                }
+
+                // ── DAR BAIXA: Marca PAGO na planilha master e limpa Coluna G ────
                 try {
-                    const urlNossaAPI = 'https://script.google.com/macros/s/AKfycbwybYUEjWEJFp_K7riISrWfqqX2d4nn5dbgSBuZJQDNqE1MXCJf-Iv6nGHvrwTy9m6C/exec';
-                    await fetch(urlNossaAPI, {
+                    await fetch(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({
@@ -825,14 +856,21 @@
         }
 
         window.baixarRecibo = function() {
+            // Se o PDF já foi gerado pelo botão Gerar Recibo, usa ele diretamente
+            if (window._ultimoPdfBase64 && window._ultimoNomeRecibo) {
+                const link = document.createElement('a');
+                link.href = 'data:application/pdf;base64,' + window._ultimoPdfBase64;
+                link.download = window._ultimoNomeRecibo;
+                link.click();
+                return;
+            }
+            // Fallback: usa print do navegador
             const numero = numeroReciboGerado || document.getElementById('numeroRecibo').value;
             const nome = document.getElementById('nomePagador').value;
             const cim = document.getElementById('cimPagador').value;
             let mesesTexto = mesesSelecionados.length > 0 ? mesesSelecionados.map(m => m.text.replace(' de ', ' ')).join(', ') : 'S-Mes';
-            const nomeCim = cim ? `${nome} - CIM ${cim}` : nome;
-            const novoTitulo = `Recibo ${numero} - ${nomeCim} - ${mesesTexto}`;
             const tituloOriginal = document.title;
-            document.title = novoTitulo;
+            document.title = `Recibo ${numero} - ${nome} - CIM ${cim} - ${mesesTexto}`;
             window.print();
             setTimeout(() => { document.title = tituloOriginal; }, 2000);
         }
